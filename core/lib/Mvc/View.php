@@ -4,15 +4,16 @@ namespace Conpoz\Lib\Mvc;
 
 class View extends \stdClass
 {
-    const VIEW_ROOT = APP_PATH . '/view/';
+    public $__conpozViewRoot;
     public function __construct()
     {
-        
+        $this->__conpozViewRoot = APP_PATH . '/view/';
     }
 
     public function render($__conpozViewPath = null)
     {
-        $__conpozViewPath = SELF::VIEW_ROOT . $__conpozViewPath . '.php'
+        $__conpozViewPath = $this->__conpozViewRoot . $__conpozViewPath . '.php';
+        unset($this->__conpozViewRoot);
         if (is_null($__conpozViewPath) || empty($__conpozViewPath) || !is_file($__conpozViewPath)) {
             return false;
         }

@@ -36,7 +36,7 @@ class DBQuery
         return $this->success;
     }
 
-    public function lastError() {
+    public function error() {
         return $this->errorInfo;
     }
 
