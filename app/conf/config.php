@@ -8,6 +8,7 @@ return array(
         ),
     'autoloadNamespace' => array(
         'Conpoz\\Controller\\' => APP_PATH . '/controller/',
+        'Conpoz\\Component\\' => APP_PATH . '/component/',
         'Conpoz\\Lib\\' => CORE_PATH . '/lib/',
         ),
     'db' => array(
