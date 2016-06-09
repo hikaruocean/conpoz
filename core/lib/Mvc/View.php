@@ -7,14 +7,21 @@ class View extends \stdClass
     const VIEW_ROOT = APP_PATH . '/view/';
     public function __construct()
     {
-
+        
     }
 
-    public function render($path = null)
+    public function render($__conpozViewPath = null)
     {
-        if (!$path) {
+        $__conpozViewPath = SELF::VIEW_ROOT . $__conpozViewPath . '.php'
+        if (is_null($__conpozViewPath) || empty($__conpozViewPath) || !is_file($__conpozViewPath)) {
             return false;
         }
-        require(SELF::VIEW_ROOT . $path . '.php');
+        $__varsAry = get_object_vars($this);
+        foreach($__varsAry as $__k => &$__v) {
+            ${$__k} = &$__v;
+        }
+        $this->viewPath = &$__conpozViewPath;
+        unset($__varsAry, $__k, $__v, $__conpozViewPath);
+        require($this->viewPath);
     }
 }

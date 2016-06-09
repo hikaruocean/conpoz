@@ -4,9 +4,9 @@ namespace Conpoz\Lib\Mvc;
 
 class App extends \stdClass
 {
-    public function __construct($service)
+    public function __construct($bag)
     {
-        $this->bag = $service;
+        $this->bag = $bag;
     }
 
     public function run(&$config = null)

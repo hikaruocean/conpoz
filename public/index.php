@@ -4,6 +4,6 @@ define('CORE_PATH', __DIR__ . '/../core');
 
 $config = require(APP_PATH . '/conf/config.php');
 require(CORE_PATH . '/include/autoLoader.php');
-$service = require(APP_PATH . '/conf/service.php');
-$app = new \Conpoz\Lib\Mvc\App($service);
+$bag = require(APP_PATH . '/conf/service.php');
+$app = new \Conpoz\Lib\Mvc\App($bag);
 $app->run($config);
