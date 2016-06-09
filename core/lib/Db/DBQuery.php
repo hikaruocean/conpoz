@@ -15,7 +15,7 @@ class DBQuery
             return false;
         }
 
-        $params['charset'] = $params['charset'] ? $params['charset'] : 'utf8';
+        $params['charset'] = isset($params['charset']) ? $params['charset'] : 'utf8';
         $dsn = $params['adapter'] . ':dbname=' .$params['dbname'] . ';host=' . $params['host'] . ';charset=' . $params['charset'];
         $user = $params['username'];
         $password = $params['password'];

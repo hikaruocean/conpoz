@@ -10,4 +10,11 @@ return array(
         'Conpoz\\Controller\\' => APP_PATH . '/controller/',
         'Conpoz\\Lib\\' => CORE_PATH . '/lib/',
         ),
+    'db' => array(
+        'adapter' => 'mysql',
+        'dbname' => 'hikaru',
+        'host' => 'localhost',
+        'username' => 'root',
+        'password' => 'qeksnopre'
+        )
     );

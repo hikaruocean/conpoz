@@ -2,11 +2,11 @@
 
 namespace Conpoz\Lib\Mvc;
 
-class App
+class App extends \stdClass
 {
-    public function __construct(&$service = null)
+    public function __construct($service)
     {
-
+        $this->bag = $service;
     }
 
     public function run(&$config = null)
@@ -22,7 +22,7 @@ class App
          * get controller, get action 
          */
         $config['route'] = array_merge($configRouteDefault, $config['route']);
-        $uri = $_GET['_url'];
+        $uri = isset($_GET['_url']) ? $_GET['_url'] : '';
         $uriAry = explode('/', $uri);
         $controller = ucfirst(isset($uriAry[0]) && !empty($uriAry[0]) ? $uriAry[0] : $config['route']['defaultController']);
         $action = isset($uriAry[1]) && !empty($uriAry[1]) ? $uriAry[1] : $config['route']['defaultAction'];
@@ -41,7 +41,8 @@ class App
                 $controllerObject = new $controllerClass();
             }
         }
-
+        $controllerObject->app = $this;
+        $controllerObject->bag = $this->bag;
         $controllerObject->{$action . 'Action'}();
     }
 }
