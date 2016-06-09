@@ -2,27 +2,37 @@
 
 namespace Conpoz\Lib\Mvc;
 
-class View extends \stdClass
+class View
 {
-    public $__conpozViewRoot;
+    public $viewRoot;
+    public $viewPath;
+    public $data = array();
     public function __construct()
     {
-        $this->__conpozViewRoot = APP_PATH . '/view/';
+        $this->viewRoot = APP_PATH . '/view/';
     }
 
     public function render($__conpozViewPath = null)
     {
-        $__conpozViewPath = $this->__conpozViewRoot . $__conpozViewPath . '.php';
-        unset($this->__conpozViewRoot);
+        $__conpozViewPath = $this->viewRoot . $__conpozViewPath . '.php';
         if (is_null($__conpozViewPath) || empty($__conpozViewPath) || !is_file($__conpozViewPath)) {
             return false;
         }
-        $__varsAry = get_object_vars($this);
-        foreach($__varsAry as $__k => &$__v) {
+        foreach($this->data as $__k => &$__v) {
             ${$__k} = &$__v;
         }
         $this->viewPath = &$__conpozViewPath;
         unset($__varsAry, $__k, $__v, $__conpozViewPath);
         require($this->viewPath);
+    }
+
+    public function __set($name, $value)
+    {
+        $this->data[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return isset($this->data[$name]) ? $this->data[$name] : null;
     }
 }

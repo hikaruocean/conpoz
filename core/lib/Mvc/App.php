@@ -19,8 +19,10 @@ class App extends \stdClass
             );
 
         /**
-         * get controller, get action 
+         * get controller, get action
+         * Gen controllerObject
          */
+        
         $config['route'] = array_merge($configRouteDefault, $config['route']);
         $uri = isset($_GET['_url']) ? $_GET['_url'] : '';
         $uriAry = explode('/', $uri);
@@ -41,8 +43,23 @@ class App extends \stdClass
                 $controllerObject = new $controllerClass();
             }
         }
+
+        /**
+         * Gen MVC structure
+         *
+         * Pass (bag) to every one
+         *
+         *                          |--> (model)
+         * (app) --> (controller) --|
+         *                          |--> (view)
+         */
+
+        $this->controller = $controllerObject;
         $controllerObject->app = $this;
         $controllerObject->bag = $this->bag;
+        $controllerObject->view = new \Conpoz\Lib\Mvc\View();
+        $controllerObject->view->bag = $this->bag;
+        $controllerObject->view->controller = $controllerObject;
         $controllerObject->{$action . 'Action'}();
     }
 }

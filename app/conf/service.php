@@ -1,6 +1,7 @@
 <?php 
 $bag = new \Conpoz\Lib\Util\Container();
 
+$bag->config = $config;
 $bag->dbquery = function() use (&$config) {
     $db = new \Conpoz\Lib\Db\DBQuery($config['db']);
     if (!$db->success()) {
@@ -9,7 +10,4 @@ $bag->dbquery = function() use (&$config) {
     return $db;
 };
 
-$bag->view = function() {
-    return new \Conpoz\Lib\Mvc\View();
-};
 return $bag;

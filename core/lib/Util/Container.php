@@ -12,7 +12,7 @@ class Container
     public function __get ($serviceName)
     {
         if (!isset($this->service[$serviceName])) {
-            return new \stdClass();
+            return null;
         }
         if (is_callable($this->service[$serviceName])) {
             $this->service[$serviceName] = $this->service[$serviceName]();
