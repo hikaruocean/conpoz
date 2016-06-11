@@ -5,34 +5,25 @@ namespace Conpoz\Lib\Mvc;
 class View
 {
     public $viewRoot;
-    public $viewPath;
-    public $data = array();
+    public $view = array();
     public function __construct()
     {
         $this->viewRoot = APP_PATH . '/view/';
     }
 
-    public function render($__conpozViewPath = null)
+    public function addView($viewPath) 
     {
-        $__conpozViewPath = $this->viewRoot . $__conpozViewPath . '.php';
-        if (is_null($__conpozViewPath) || empty($__conpozViewPath) || !is_file($__conpozViewPath)) {
+        array_push($this->view, $viewPath);
+    }
+
+    public function getView()
+    {
+        $viewPath = array_shift($this->view);
+        $viewPath =  $this->viewRoot . $viewPath . '.php';
+        if (!($realViewPath = realpath($viewPath))) {
+            throw new \Exception('Not Found View ' . $viewPath);
             return false;
         }
-        foreach($this->data as $__k => &$__v) {
-            ${$__k} = &$__v;
-        }
-        $this->viewPath = &$__conpozViewPath;
-        unset($__varsAry, $__k, $__v, $__conpozViewPath);
-        require($this->viewPath);
-    }
-
-    public function __set($name, $value)
-    {
-        $this->data[$name] = $value;
-    }
-
-    public function __get($name)
-    {
-        return isset($this->data[$name]) ? $this->data[$name] : null;
+        return $realViewPath;
     }
 }
