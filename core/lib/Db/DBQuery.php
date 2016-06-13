@@ -15,7 +15,7 @@ class DBQuery
 
     public function __construct($params) 
     {
-        set_error_handler(function(int $errno, string $errstr, string $errfile, int $errline, array $errcontext) {
+        set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
             if (strpos($errstr, "Error while sending QUERY packet") !== false) {
                 throw new \Exception("mysql server has gone away", 2006);
             }
@@ -23,7 +23,7 @@ class DBQuery
         }, E_WARNING);
 
         register_shutdown_function(function(\Conpoz\Lib\Db\DBQuery $obj) {
-            if($obj->db->inTransaction()) {
+            if($obj->success && $obj->db->inTransaction()) {
                 if(!$obj->db->rollBack()) {
                     $obj->db = null;
                 }
@@ -34,7 +34,7 @@ class DBQuery
             throw new \Exception("db connected miss params");
         }
 
-        $params['charset'] = $params['charset'] ? $params['charset'] : 'utf8';
+        $params['charset'] = isset($params['charset']) && !empty($params['charset']) ? $params['charset'] : 'utf8';
         $this->dsn = $params['adapter'] . ':dbname=' .$params['dbname'] . ';host=' . $params['host'] . ';charset=' . $params['charset'];
         $this->username = $params['username'];
         $this->password = $params['password'];
@@ -91,7 +91,7 @@ class DBQuery
         return $this->db->rollBack();
     }
 
-    public function execute(string $sql, array $params = array()) 
+    public function execute($sql, array $params = array()) 
     {
         $this->sth = null;
         if (!$this->success || empty($sql)) 
@@ -116,7 +116,7 @@ class DBQuery
         //do nothing;
     }
 
-    public function insert(string $table, array $data = array()) 
+    public function insert($table, array $data = array()) 
     {
         if (!$this->success || empty($table) || empty($data)) {
             return false;
@@ -144,7 +144,7 @@ class DBQuery
         //do nothing;
     }
 
-    public function update(string $table, array $data, string $conditions = null, array $params = array()) 
+    public function update($table, array $data, $conditions = '1', array $params = array()) 
     {
         if (!$this->success || empty($data) || empty($table)) {
             return false;
@@ -178,7 +178,7 @@ class DBQuery
         //do nothing;
     }
 
-    public function delete(string $table, string $conditions = null, array $params = array()) 
+    public function delete($table, $conditions = '1', array $params = array()) 
     {
         if (!$this->success || empty($table)) {
             return false;

@@ -14,8 +14,8 @@ return array(
     'db' => array(
         'adapter' => 'mysql',
         'dbname' => 'hikaru',
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'username' => 'root',
-        'password' => 'qeksnopre'
+        'password' => 'hikaru'
         )
     );
