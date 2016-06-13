@@ -57,9 +57,8 @@ class App extends \stdClass
         $this->controller = $controllerObject;
         $controllerObject->app = $this;
         $controllerObject->bag = $this->bag;
+        $controllerObject->model = new \Conpoz\Lib\Mvc\Model($this->bag);
         $controllerObject->view = new \Conpoz\Lib\Mvc\View();
-        $controllerObject->view->bag = $this->bag;
-        $controllerObject->view->controller = $controllerObject;
         $controllerObject->{$action . 'Action'}();
     }
 }

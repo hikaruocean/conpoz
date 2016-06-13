@@ -8,7 +8,7 @@ class View
     public $view = array();
     public function __construct()
     {
-        $this->viewRoot = APP_PATH . '/view/';
+        $this->viewRoot = APP_PATH . '/view';
     }
 
     public function addView($viewPath) 
