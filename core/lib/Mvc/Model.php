@@ -14,7 +14,7 @@ class Model
     public function __get($modelName) 
     {
         if (!isset($this->model[$modelName])) {
-            $modelClass = '\\Conpoz\\Model\\' . $modelName;
+            $modelClass = '\\Conpoz\\App\\Model\\' . $modelName;
             $this->model[$modelName] = new $modelClass();
             $this->model[$modelName]->bag = $this->bag;
         }
@@ -24,7 +24,7 @@ class Model
     public function load($modelName, $data = null)
     {
         if (!isset($this->model[$modelName])) {
-            $modelClass = '\\Conpoz\\Model\\' . $modelName;
+            $modelClass = '\\Conpoz\\App\\Model\\' . $modelName;
             $this->model[$modelName] = new $modelClass($data);
             $this->model[$modelName]->bag = $this->bag;
         }

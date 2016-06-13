@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Model;
+namespace Conpoz\App\Model;
 
 class Questions extends \stdClass
 {

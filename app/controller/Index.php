@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Controller;
+namespace Conpoz\App\Controller;
 
 class Index extends \stdClass
 {

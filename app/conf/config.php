@@ -7,8 +7,9 @@ return array(
         '404Action' => 'http404',
         ),
     'autoloadNamespace' => array(
-        'Conpoz\\Controller\\' => APP_PATH . '/controller/',
-        'Conpoz\\Model\\' => APP_PATH . '/model/',
+        'Conpoz\\App\\Controller\\' => APP_PATH . '/controller/',
+        'Conpoz\\App\\Model\\' => APP_PATH . '/model/',
+        'Conpoz\\App\\Lib\\' => APP_PATH . '/lib/',
         'Conpoz\\Lib\\' => CORE_PATH . '/lib/',
         ),
     'db' => array(
