@@ -8,7 +8,8 @@ class ResultHandler
     public $error = null;
     public $lastInsertId = null;
     public $rowCount = null;
-    public function __construct($params) {
+    public function __construct(array $params = array()) 
+    {
         if (isset($params['success']) && $params['success']) {
             $this->success = true;
         }
@@ -23,26 +24,31 @@ class ResultHandler
         }
     }
 
-    public function fetch() {
+    public function fetch() 
+    {
         if (is_null($this->sth)) {
             return false;
         }
         return $this->sth->fetch(\PDO::FETCH_OBJ);
     }
 
-    public function success() {
+    public function success() 
+    {
         return $this->success;
     }
 
-    public function error() {
+    public function error() 
+    {
         return $this->error;
     }
 
-    public function lastInsertId() {
+    public function lastInsertId() 
+    {
         return $this->lastInsertId;
     }
 
-    public function rowCount() {
+    public function rowCount() 
+    {
         return $this->rowCount;
     }
 }

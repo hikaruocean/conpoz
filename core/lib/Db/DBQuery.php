@@ -7,21 +7,44 @@ class DBQuery
     public $sth = null;
     private $success = false;
     private $errorInfo = null;
+    private $dsn = null;
+    private $username = null;
+    private $password = null;
+    protected $table;
+    protected $data;
 
-    public function __construct($params) {
-        
+    public function __construct($params) 
+    {
+        set_error_handler(function(int $errno, string $errstr, string $errfile, int $errline, array $errcontext) {
+            if (strpos($errstr, "Error while sending QUERY packet") !== false) {
+                throw new \Exception("mysql server has gone away", 2006);
+            }
+            return false;
+        }, E_WARNING);
+
+        register_shutdown_function(function(\Conpoz\Lib\Db\DBQuery $obj) {
+            if($obj->db->inTransaction()) {
+                if(!$obj->db->rollBack()) {
+                    $obj->db = null;
+                }
+            }
+        }, $this);
+
         if (empty($params['adapter']) || empty($params['dbname']) || empty($params['host']) || empty($params['username']) || empty($params['password'])) {
             throw new \Exception("db connected miss params");
-            return false;
         }
 
-        $params['charset'] = isset($params['charset']) ? $params['charset'] : 'utf8';
-        $dsn = $params['adapter'] . ':dbname=' .$params['dbname'] . ';host=' . $params['host'] . ';charset=' . $params['charset'];
-        $user = $params['username'];
-        $password = $params['password'];
+        $params['charset'] = $params['charset'] ? $params['charset'] : 'utf8';
+        $this->dsn = $params['adapter'] . ':dbname=' .$params['dbname'] . ';host=' . $params['host'] . ';charset=' . $params['charset'];
+        $this->username = $params['username'];
+        $this->password = $params['password'];
+        $this->connect();
+    }
+
+    public function connect ()
+    {
         try {
-            
-            $this->db = new \PDO($dsn, $user, $password, array(
+            $this->db = new \PDO($this->dsn, $this->username, $this->password, array(
                 \PDO::ATTR_PERSISTENT => true
             ));
         }
@@ -30,17 +53,21 @@ class DBQuery
             return false;
         }
         $this->success = true;
+        return true;
     }
 
-    public function success() {
+    public function success() 
+    {
         return $this->success;
     }
 
-    public function error() {
+    public function error() 
+    {
         return $this->errorInfo;
     }
 
-    public function begin() {
+    public function begin() 
+    {
         if (!$this->success) {
             return false;
         }
@@ -48,23 +75,27 @@ class DBQuery
         return $this;
     }
 
-    public function commit() {
+    public function commit() 
+    {
         if (!$this->success) {
             return false;
         }
         return $this->db->commit();
     }
 
-    public function rollback() {
+    public function rollback() 
+    {
         if (!$this->success) {
             return false;
         }
         return $this->db->rollBack();
     }
 
-    public function execute($sql, array $params = array()) {
+    public function execute(string $sql, array $params = array()) 
+    {
         $this->sth = null;
-        if (!$this->success || empty($sql)) {
+        if (!$this->success || empty($sql)) 
+        {
             return false;
         }
         $this->sth = $this->db->prepare($sql);
@@ -80,50 +111,91 @@ class DBQuery
         ));
     }
 
-    public function insert($table, array $data = array()) {
+    protected function beforeInsert() 
+    {
+        //do nothing;
+    }
+
+    public function insert(string $table, array $data = array()) 
+    {
         if (!$this->success || empty($table) || empty($data)) {
             return false;
         }
-        $this->beforeInsert($table, $data);
+        $this->table = $table;
+        $this->data = $data;
+        $this->beforeInsert();
         $columnsStr = implode(',', array_keys($data));
         $columnsStr = '(' . $columnsStr . ')';
         $valuesBindStr = '(:' . implode(',:', array_keys($data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
         $rh = $this->execute($sql, $data);
         $rh->lastInsertId = $this->db->lastInsertId();
+        $this->afterInsert();
         return $rh;
     }
 
-    protected function beforeInsert(&$table, &$data) {
+    protected function afterInsert ()
+    {
         //do nothing;
     }
 
-    public function update($table,array $data, $conditions = '1', array $params = array()) {
+    protected function beforeUpdate() 
+    {
+        //do nothing;
+    }
+
+    public function update(string $table, array $data, string $conditions = null, array $params = array()) 
+    {
         if (!$this->success || empty($data) || empty($table)) {
             return false;
         }
-        $this->beforeUpdate($table, $data);
+        if (is_null($conditions)) {
+            $conditions = '1';
+        }
+        $this->table = $table;
+        $this->data = $data;
+        $this->beforeUpdate();
         $updateStr = '';
-        $conditionsStr = '';
-        $paramsAry = [];
+        $paramsAry = array();
         foreach ($data as $columnName => $columnValue) {
             $updateStr .= ' ' . $columnName . ' =  :d_' . $columnName . ',';
             $paramsAry['d_' . $columnName] = $columnValue;
         }
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
-        return $this->execute($sql, array_merge($paramsAry, $params));
+        $rh = $this->execute($sql, array_merge($paramsAry, $params));
+        $this->afterUpdate();
+        return $rh;
     }
 
-    protected function beforeUpdate(&$table, &$data) {
+    protected function afterUpdate() 
+    {
         //do nothing;
     }
 
-    public function delete($table, $conditions = 1, array $params = array()) {
+    protected function beforeDelete ()
+    {
+        //do nothing;
+    }
+
+    public function delete(string $table, string $conditions = null, array $params = array()) 
+    {
         if (!$this->success || empty($table)) {
             return false;
         }
+        if (is_null($conditions)) {
+            $conditions = '1';
+        }
+        $this->table = $table;
+        $this->beforeDelete();
         $sql = 'DELETE FROM ' . $table . ' WHERE ' . $conditions;
-        return $this->execute($sql, $params);
+        $rh = $this->execute($sql, $params);
+        $this->afterDelete();
+        return $rh;
+    }
+
+    protected function afterDelete ()
+    {
+        //do nothing;
     }
 }
