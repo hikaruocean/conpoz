@@ -10,4 +10,9 @@ $bag->dbquery = function() use (&$config) {
     return $db;
 };
 
+$bag->req = function() {
+    $req = new \Conpoz\Lib\Util\Request();
+    return $req;
+};
+
 return $bag;

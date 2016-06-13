@@ -5,11 +5,13 @@ class Index extends \stdClass
 {
     public function indexAction () 
     {
+        var_dump($this->bag->req->getQuery(array('name', 'go', 'sex')));
+        
         /**
          *  version 1
          *  query db in controller
          */
-        $rh = $this->bag->dbquery->execute("SELECT * FROM questions WHERE 1");
+        // $rh = $this->bag->dbquery->execute("SELECT * FROM questions WHERE 1");
         
         /**
         * version 2
@@ -22,7 +24,7 @@ class Index extends \stdClass
          *  query db by call model (use loader function load($modelName, $contructData = null))
          *  this version can call model's contruct function
          */
-        $qModel = $this->model->load('Questions', $data);
+        $qModel = $this->model->load('Questions');
         $rh = $qModel->getListRh();
         
         /**
@@ -30,7 +32,6 @@ class Index extends \stdClass
          */
         $this->view->addView('/htmlTemplate');
         $this->view->addView('/index/index');
-        $this->view->render();
         require($this->view->getView());
     }
 }
