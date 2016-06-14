@@ -46,9 +46,32 @@ class Request
         return $returnAry;
     }
 
-    public function getFile()
+    public function getFile($name)
     {
+        if (!isset($_FILES[$name]) || empty($_FILES[$name])) {
+            /**
+             * Return empty array
+             */ 
+            return array();
+        }
+
+        if (!is_array($_FILES[$name]['name'])) {
+            $uploadFile = new \Conpoz\Lib\Util\UploadFile($_FILES[$name]);
+            return array($uploadFile);
+        } 
         
+        $result = array();
+        foreach ($_FILES[$name]['name'] as $k => $v) {
+            $uploadFile = new \Conpoz\Lib\Util\UploadFile(array(
+                'name' => $_FILES[$name]['name'][$k],
+                'type' => $_FILES[$name]['type'][$k],
+                'size' => $_FILES[$name]['size'][$k],
+                'tmp_name' => $_FILES[$name]['tmp_name'][$k],
+                'error' => $_FILES[$name]['error'][$k],
+                ));
+            array_push($result, $uploadFile);
+        }
+        return $result;
     }
 
     public function getRawContent()

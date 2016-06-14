@@ -15,4 +15,9 @@ $bag->req = function() {
     return $req;
 };
 
+$bag->imageLoader = function () {
+    // create an image manager instance with favored driver
+    return new \Intervention\Image\ImageManager(array('driver' => 'gd'));
+};
+
 return $bag;

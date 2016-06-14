@@ -34,4 +34,17 @@ class Index extends \stdClass
         $this->view->addView('/index/index');
         require($this->view->getView());
     }
+
+    public function uploadAction () {
+        if ($this->bag->req->getMethod() == 'POST') {
+            $fileObjAry = $this->bag->req->getFile('image');
+            $image = $this->bag->imageLoader->make($fileObjAry[0]->tmpName)->orientate();
+            $image->widen(600);
+            echo $image->response();
+        } else {
+            $this->view->addView('/htmlTemplate');
+            $this->view->addView('/index/upload');
+            require($this->view->getView());
+        }
+    }
 }

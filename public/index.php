@@ -6,6 +6,7 @@ try {
 
     $config = require(APP_PATH . '/conf/config.php');
     require(CORE_PATH . '/include/autoLoader.php');
+    require(__DIR__ . '/../vendor/autoload.php');
     $bag = require(APP_PATH . '/conf/service.php');
     $app = new \Conpoz\Lib\Mvc\App($bag);
     $app->run($config);
