@@ -38,6 +38,10 @@ class Index extends \stdClass
     public function uploadAction () {
         if ($this->bag->req->getMethod() == 'POST') {
             $fileObjAry = $this->bag->req->getFile('image');
+
+            if (empty($fileObjAry[0]->name)) {
+                return;
+            }
             $image = $this->bag->imageLoader->make($fileObjAry[0]->tmpName)->orientate();
             $image->widen(600);
             echo $image->response();
