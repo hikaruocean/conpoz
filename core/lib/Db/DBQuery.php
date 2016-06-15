@@ -5,7 +5,7 @@ class DBQuery
 {
     public $db = null;
     public $sth = null;
-    private $success = false;
+    public $success = false;
     private $errorInfo = null;
     private $dsn = null;
     private $username = null;
