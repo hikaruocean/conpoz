@@ -42,9 +42,9 @@ class Index extends \stdClass
             if (empty($fileObjAry[0]->name)) {
                 return;
             }
-            $image = $this->bag->imgMng->make($fileObjAry[0]->tmpName)->orientate();
-            $image->widen(600);
-            echo $image->response();
+            $image = $this->bag->imgMng->make($fileObjAry[0]->tmpName)->auto_orient();
+            $image->fit_to_width(600);
+            echo $image->output();
         } else {
             $this->view->addView('/htmlTemplate');
             $this->view->addView('/index/upload');

@@ -21,7 +21,7 @@ $bag->sess = function () {
 };
 
 $bag->imgMng = function () {
-    return new \Intervention\Image\ImageManager(array('driver' => 'gd'));
+    return new \Conpoz\Lib\Util\ImageManager();
 };
 
 $bag->net = function () {
