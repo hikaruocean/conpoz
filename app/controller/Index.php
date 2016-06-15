@@ -42,7 +42,7 @@ class Index extends \stdClass
             if (empty($fileObjAry[0]->name)) {
                 return;
             }
-            $image = $this->bag->imageLoader->make($fileObjAry[0]->tmpName)->orientate();
+            $image = $this->bag->imgMng->make($fileObjAry[0]->tmpName)->orientate();
             $image->widen(600);
             echo $image->response();
         } else {
@@ -50,5 +50,21 @@ class Index extends \stdClass
             $this->view->addView('/index/upload');
             require($this->view->getView());
         }
+    }
+
+    public function sessionAction () 
+    {
+        var_dump($this->bag->sess->id);
+        $this->bag->sess->id = rand(0, 9);
+        var_dump($this->bag->sess->id);
+        $this->bag->sess->forceSet(array('name' => 'hikaru', 'age' => '99'));
+        var_dump($_SESSION);
+        $this->bag->sess->truncate();
+    }
+
+    public function curlAction () 
+    {
+        $content = $this->bag->net->httpRequest('GET', 'http://www.onlypet.com.tw');
+        var_dump($content);
     }
 }

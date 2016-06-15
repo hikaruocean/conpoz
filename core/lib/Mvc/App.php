@@ -47,12 +47,6 @@ class App extends \stdClass
 
         /**
          * Gen MVC structure
-         *
-         * Pass (bag) to every one
-         *
-         *                          |--> (model)
-         * (app) --> (controller) --|
-         *                          |--> (view)
          */
 
         $this->controller = $controllerObject;

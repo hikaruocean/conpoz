@@ -16,7 +16,7 @@ class DBQuery
     public function __construct($params) 
     {
         set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
-            if (strpos($errstr, "Error while sending QUERY packet") !== false) {
+            if (strpos($errstr, 'PDO::__construct(): MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
                 throw new \Exception("mysql server has gone away", 2006);
             }
             return false;
