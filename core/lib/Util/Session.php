@@ -5,7 +5,12 @@ class Session
 {
     public function __construct() 
     {
-        session_start();
+        $this->start();
+    }
+
+    public function start()
+    {
+        session_start();   
     }
 
     public function truncate () 
@@ -17,6 +22,11 @@ class Session
     public function  forceSet(array $data = array()) 
     {
         $_SESSION = $data;
+    }
+
+    public function dump()
+    {
+        return $_SESSION;
     }
 
     public function __get ($name) 

@@ -5,6 +5,8 @@ namespace Conpoz\Lib\Mvc;
 class App extends \stdClass
 {
     public $config;
+    public $controllerName;
+    public $actionName;
     public function __construct($bag)
     {
         $this->bag = $bag;
@@ -57,11 +59,16 @@ class App extends \stdClass
          * Gen MVC structure
          */
 
+        $this->controllerName = $controller;
+        $this->actionName = $action;
         $this->controller = $controllerObject;
         $controllerObject->app = $this;
         $controllerObject->bag = $this->bag;
         $controllerObject->model = new \Conpoz\Lib\Mvc\Model($this->bag);
         $controllerObject->view = new \Conpoz\Lib\Mvc\View();
+        if (method_exists($controllerObject, 'init')) {
+            $controllerObject->init();
+        }
         $controllerObject->{$action . 'Action'}();
     }
 }
