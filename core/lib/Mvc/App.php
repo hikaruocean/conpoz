@@ -27,8 +27,14 @@ class App extends \stdClass
         $uri = isset($_GET['_url']) ? $_GET['_url'] : '';
         $uriAry = explode('/', $uri);
         array_shift($uriAry);
-        $controller = ucfirst(isset($uriAry[0]) && !empty($uriAry[0]) ? $uriAry[0] : $config['route']['defaultController']);
+        $controller = isset($uriAry[0]) && !empty($uriAry[0]) ? $uriAry[0] : $config['route']['defaultController'];
         $action = isset($uriAry[1]) && !empty($uriAry[1]) ? $uriAry[1] : $config['route']['defaultAction'];
+        $this->dispatch($controller, $action);
+    }
+
+    public function dispatch ($controller, $action)
+    {
+        $controller = ucfirst($controller);
         if (!class_exists('Conpoz\\App\\Controller\\' . $controller)) {
             $controller = $config['route']['404Controller'];
             $action = $config['route']['404Action'];
