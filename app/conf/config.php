@@ -18,5 +18,16 @@ return array(
         'host' => '127.0.0.1',
         'username' => 'root',
         'password' => 'hikaru'
-        )
+        ),
+    'mem' => array(
+        'host' => '127.0.0.1',
+        'port' => 11211,
+        ),
+    'ACL' => array(
+        'publicRole' => 'guest',
+        'publicResources' => array(
+            array('Index', '*'),
+            array('Error', '*'),
+            ),
+        ),
     );

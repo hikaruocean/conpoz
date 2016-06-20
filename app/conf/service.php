@@ -20,6 +20,13 @@ $bag->sess = function () {
     return new \Conpoz\Lib\Util\Session();
 };
 
+$bag->mem = function () use (&$config) {
+    $mem = new \memcached();
+    $mem->setOption(Memcached::OPT_PREFIX_KEY, 'conpoz.lo.');
+    $mem->addServer($config['mem']['host'], $config['mem']['port']);
+    return $mem;
+};
+
 $bag->imgMng = function () {
     return new \Conpoz\Lib\Util\ImageManager();
 };

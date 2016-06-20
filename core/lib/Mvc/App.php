@@ -25,7 +25,6 @@ class App extends \stdClass
          * get controller, get action
          * Gen controllerObject
          */
-        
         $config['route'] = array_merge($configRouteDefault, $config['route']);
         $this->config = &$config;
         $uri = isset($_GET['_url']) ? $_GET['_url'] : '';
@@ -58,7 +57,7 @@ class App extends \stdClass
         /**
          * Gen MVC structure
          */
-
+        
         $this->controllerName = $controller;
         $this->actionName = $action;
         $this->controller = $controllerObject;
@@ -67,7 +66,9 @@ class App extends \stdClass
         $controllerObject->model = new \Conpoz\Lib\Mvc\Model($this->bag);
         $controllerObject->view = new \Conpoz\Lib\Mvc\View();
         if (method_exists($controllerObject, 'init')) {
-            $controllerObject->init();
+            if ($controllerObject->init() === false) {
+                return false;
+            }
         }
         $controllerObject->{$action . 'Action'}();
     }
