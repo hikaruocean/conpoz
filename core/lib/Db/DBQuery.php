@@ -124,11 +124,11 @@ class DBQuery
         $this->table = $table;
         $this->data = $data;
         $this->beforeInsert();
-        $columnsStr = implode(',', array_keys($data));
+        $columnsStr = implode(',', array_keys($this->data));
         $columnsStr = '(' . $columnsStr . ')';
-        $valuesBindStr = '(:' . implode(',:', array_keys($data)) . ')';
+        $valuesBindStr = '(:' . implode(',:', array_keys($this->data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
-        $rh = $this->execute($sql, $data);
+        $rh = $this->execute($sql, $this->data);
         $rh->lastInsertId = $this->db->lastInsertId();
         $this->afterInsert();
         return $rh;
@@ -157,7 +157,7 @@ class DBQuery
         $this->beforeUpdate();
         $updateStr = '';
         $paramsAry = array();
-        foreach ($data as $columnName => $columnValue) {
+        foreach ($this->data as $columnName => $columnValue) {
             $updateStr .= ' ' . $columnName . ' =  :d_' . $columnName . ',';
             $paramsAry['d_' . $columnName] = $columnValue;
         }
