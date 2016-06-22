@@ -66,10 +66,10 @@ class App extends \stdClass
         $controllerObject->model = new \Conpoz\Lib\Mvc\Model($this->bag);
         $controllerObject->view = new \Conpoz\Lib\Mvc\View();
         if (method_exists($controllerObject, 'init')) {
-            if ($controllerObject->init() === false) {
+            if ($controllerObject->init($this->bag) === false) {
                 return false;
             }
         }
-        $controllerObject->{$action . 'Action'}();
+        $controllerObject->{$action . 'Action'}($this->bag);
     }
 }

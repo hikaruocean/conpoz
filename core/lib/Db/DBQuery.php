@@ -198,4 +198,9 @@ class DBQuery
     {
         //do nothing;
     }
+
+    public function getData ()
+    {
+        return $this->data;
+    }
 }

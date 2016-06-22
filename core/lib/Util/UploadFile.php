@@ -55,7 +55,7 @@ class UploadFile
         return $this->otherInfo[$name];
     }
 
-    public function move(&$destinationPath) {
+    public function move($destinationPath) {
         return (move_uploaded_file($this->tmpName, $destinationPath));
     }
 }

@@ -18,4 +18,8 @@ class Tool
         }
         return $return;
     }
+
+    public static function html($string) {
+        return htmlspecialchars($string, ENT_QUOTES);
+    }
 }

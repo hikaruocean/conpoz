@@ -3,21 +3,21 @@ namespace Conpoz\App\Controller;
 
 abstract class BaseController extends \stdClass
 {
-    public function init()
+    public function init($bag)
     {
         /**
          * ACL
          */
-        if (!$this->bag->sess->user_id) {
+        if (!$bag->sess->user_id) {
             $roles = ['guest'];
         } else {
             $roles = ['admin'];
         }
 
-        $aclCache = $this->bag->mem->get('ACL');
+        $aclCache = $bag->mem->get('ACL');
         if (!$aclCache) {
             $acl = require(APP_PATH . '/conf/acl.php');
-            $this->bag->mem->set('ACL', serialize($acl));
+            $bag->mem->set('ACL', serialize($acl));
         } else {
             require_once(CORE_PATH . '/lib/Util/Acl.php');
             $acl = unserialize($aclCache);

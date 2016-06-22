@@ -3,15 +3,15 @@ namespace Conpoz\App\Controller;
 
 class Index extends \stdClass
 {
-    public function indexAction () 
+    public function indexAction ($bag) 
     {
-        var_dump($this->bag->req->getQuery(array('name', 'go', 'sex')));
+        var_dump($bag->req->getQuery(array('name', 'go', 'sex')));
         
         /**
          *  version 1
          *  query db in controller
          */
-        // $rh = $this->bag->dbquery->execute("SELECT * FROM questions WHERE 1");
+        // $rh = $bag->dbquery->execute("SELECT * FROM questions WHERE 1");
         
         /**
         * version 2
