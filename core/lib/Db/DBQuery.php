@@ -100,7 +100,11 @@ class DBQuery
         }
         $this->sth = $this->db->prepare($sql);
         foreach ($params as $k => $v) {
-            $this->sth->bindValue(':' . $k, $v);
+            if (is_int($k)) {
+                $this->sth->bindValue($k + 1, $v);
+            } else {
+                $this->sth->bindValue(':' . $k, $v);
+            }
         }
         $success = $this->sth->execute();
         return new \Conpoz\Lib\Db\DBQuery\ResultHandler(array(
