@@ -1,7 +1,7 @@
 <?php 
 namespace Conpoz\App\Lib\ValidateRule;
 
-class Test extends \Conpoz\Lib\Util\Validator\ValidateRule
+class Test extends \Conpoz\Core\Lib\Util\Validator\ValidateRule
 {
     public $id = array(
         'required' => 'id is required!',

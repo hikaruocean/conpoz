@@ -1,6 +1,6 @@
 <?php 
 
-namespace Conpoz\Lib\Mvc;
+namespace Conpoz\Core\Lib\Mvc;
 
 class View
 {

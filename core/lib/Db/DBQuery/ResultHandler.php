@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Lib\Db\DBQuery;
+namespace Conpoz\Core\Lib\Db\DBQuery;
 
 class ResultHandler
 {

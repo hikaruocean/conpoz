@@ -1,9 +1,9 @@
 <?php 
-$bag = new \Conpoz\Lib\Util\Container();
+$bag = new \Conpoz\Core\Lib\Util\Container();
 
 $bag->config = $config;
 $bag->dbquery = function () use (&$config) {
-    $db = new \Conpoz\Lib\Db\DBQuery($config['db']);
+    $db = new \Conpoz\Core\Lib\Db\DBQuery($config['db']);
     if (!$db->success()) {
     	throw new \Exception($db->error());
     }
@@ -11,13 +11,13 @@ $bag->dbquery = function () use (&$config) {
 };
 
 $bag->req = function () {
-    $req = new \Conpoz\Lib\Util\Request();
+    $req = new \Conpoz\Core\Lib\Util\Request();
     return $req;
 };
 
 $bag->sess = function () {
     session_set_cookie_params(0, '/', '.conpoz.lo');
-    return new \Conpoz\Lib\Util\Session();
+    return new \Conpoz\Core\Lib\Util\Session();
 };
 
 $bag->mem = function () use (&$config) {
@@ -28,19 +28,19 @@ $bag->mem = function () use (&$config) {
 };
 
 $bag->imgMng = function () {
-    return new \Conpoz\Lib\Util\ImageManager();
+    return new \Conpoz\Core\Lib\Util\ImageManager();
 };
 
 $bag->net = function () {
-    return new \Conpoz\Lib\Util\Network();
+    return new \Conpoz\Core\Lib\Util\Network();
 };
 
 $bag->tool = function () {
-    return new \Conpoz\Lib\Util\Tool();
+    return new \Conpoz\Core\Lib\Util\Tool();
 };
 
 $bag->validator = function () {
-    return new \Conpoz\Lib\Util\Validator();
+    return new \Conpoz\Core\Lib\Util\Validator();
 };
 
 return $bag;

@@ -1,6 +1,6 @@
 <?php 
 
-namespace Conpoz\Lib\Db;
+namespace Conpoz\Core\Lib\Db;
 class DBQuery 
 {
     public $db = null;
@@ -22,7 +22,7 @@ class DBQuery
             return false;
         }, E_WARNING);
 
-        register_shutdown_function(function(\Conpoz\Lib\Db\DBQuery $obj) {
+        register_shutdown_function(function(\Conpoz\Core\Lib\Db\DBQuery $obj) {
             if($obj->success && $obj->db->inTransaction()) {
                 if(!$obj->db->rollBack()) {
                     $obj->db = null;
@@ -107,7 +107,7 @@ class DBQuery
             }
         }
         $success = $this->sth->execute();
-        return new \Conpoz\Lib\Db\DBQuery\ResultHandler(array(
+        return new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
             'success' => $success,
             'sth' => $this->sth,
             'error' => $this->sth->errorInfo(),

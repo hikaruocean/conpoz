@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Lib\Util;
+namespace Conpoz\Core\Lib\Util;
 
 class Request
 {
@@ -56,13 +56,13 @@ class Request
         }
 
         if (!is_array($_FILES[$name]['name'])) {
-            $uploadFile = new \Conpoz\Lib\Util\UploadFile($_FILES[$name]);
+            $uploadFile = new \Conpoz\Core\Lib\Util\UploadFile($_FILES[$name]);
             return array($uploadFile);
         } 
         
         $result = array();
         foreach ($_FILES[$name]['name'] as $k => $v) {
-            $uploadFile = new \Conpoz\Lib\Util\UploadFile(array(
+            $uploadFile = new \Conpoz\Core\Lib\Util\UploadFile(array(
                 'name' => $_FILES[$name]['name'][$k],
                 'type' => $_FILES[$name]['type'][$k],
                 'size' => $_FILES[$name]['size'][$k],

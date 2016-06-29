@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Lib\Util;
+namespace Conpoz\Core\Lib\Util;
 
 class ACL
 {

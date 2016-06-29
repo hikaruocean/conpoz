@@ -1,5 +1,5 @@
 <?php 
-namespace Conpoz\Lib\Util\Validator;
+namespace Conpoz\Core\Lib\Util\Validator;
 abstract class ValidateRule
 {
 

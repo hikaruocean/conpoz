@@ -1,6 +1,6 @@
 <?php 
 
-namespace Conpoz\Lib\Mvc;
+namespace Conpoz\Core\Lib\Mvc;
 
 class App extends \stdClass
 {
@@ -63,8 +63,8 @@ class App extends \stdClass
         $this->controller = $controllerObject;
         $controllerObject->app = $this;
         $controllerObject->bag = $this->bag;
-        $controllerObject->model = new \Conpoz\Lib\Mvc\Model($this->bag);
-        $controllerObject->view = new \Conpoz\Lib\Mvc\View();
+        $controllerObject->model = new \Conpoz\Core\Lib\Mvc\Model($this->bag);
+        $controllerObject->view = new \Conpoz\Core\Lib\Mvc\View();
         if (method_exists($controllerObject, 'init')) {
             if ($controllerObject->init($this->bag) === false) {
                 return false;

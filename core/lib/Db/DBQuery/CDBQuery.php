@@ -1,7 +1,7 @@
 <?php 
-namespace Conpoz\Lib\Db\DBQuery;
+namespace Conpoz\Core\Lib\Db\DBQuery;
 
-class CDBQuery extends \Conpoz\Lib\Db\DBQuery
+class CDBQuery extends \Conpoz\Core\Lib\Db\DBQuery
 {
     protected function beforeInsert() 
     {
