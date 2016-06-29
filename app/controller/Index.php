@@ -67,4 +67,23 @@ class Index extends \stdClass
         $content = $this->bag->net->httpRequest('GET', 'http://www.onlypet.com.tw');
         var_dump($content);
     }
+
+    public function validateAction($bag)
+    {
+        $validateRule = new \Conpoz\App\Lib\ValidateRule\Test();
+
+        if ($bag->req->getMethod() != 'POST') {
+            $this->view->addView('/htmlTemplate');
+            $this->view->addView('/index/validate');
+            require($this->view->getView());
+        } else {
+            // $post = $bag->req->getPost(array('value1', 'value2', 'value3'));
+            $errAry = $bag->validator->valid($validateRule, $_POST);
+            if (!empty($errAry)) {
+                var_dump($errAry);
+                return;
+            }
+            echo 'matched!';
+        }
+    }
 }

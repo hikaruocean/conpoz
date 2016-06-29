@@ -39,4 +39,8 @@ $bag->tool = function () {
     return new \Conpoz\Lib\Util\Tool();
 };
 
+$bag->validator = function () {
+    return new \Conpoz\Lib\Util\Validator();
+};
+
 return $bag;

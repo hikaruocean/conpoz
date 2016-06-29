@@ -1,8 +1,9 @@
 <?php
-namespace Coponz\Lib\Util;
+namespace Conpoz\Lib\Util;
+
 class Validator
 {
-    public static function valid(\Coponz\Lib\Util\Validator\ValidateRule $ruleObj, &$dataAry) 
+    public static function valid($ruleObj, &$dataAry) 
     {
         $msgAry = array();
         $rulesAry = array();
@@ -14,8 +15,8 @@ class Validator
         $ruleErrBreak = $ruleObj->getRuleErrBreak();
         $columnErrBreak = $ruleObj->getColumnErrBreak();
         $choiceField = $ruleObj->getChoice();
-        if (count(choiceField) == 0) {
-            $rulesAry = get_object_vars(ruleObj);
+        if (count($choiceField) == 0) {
+            $rulesAry = get_object_vars($ruleObj);
         } else {
             foreach ($choiceField as $v) {
                 if (isset($ruleObj->{$v})) {
@@ -28,6 +29,7 @@ class Validator
             return false;
         }
         foreach ($rulesAry as $k => $v) {
+            $errorCount = 0;
             if ($columnErrBreak && count($msgAry) > 0) {
                 return $msgAry;
             }
@@ -39,6 +41,7 @@ class Validator
                 }
                 foreach ($v as $rstr => $rmsg) {
                     $r = explode(":", $rstr, 2);
+                    
                     switch ($r[0]) {
                         /**
                         * no user assign rule value
@@ -50,9 +53,7 @@ class Validator
                             }
                             break;
                         case "boolean":
-                            if ($dataAry[$k] === "true" && $dataAry[$k] === "false" ) {
-                                //do nothing
-                            } else {
+                            if ($dataAry[$k] !== "true" && $dataAry[$k] !== "false" ) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
@@ -89,8 +90,7 @@ class Validator
                                     $msgAry[] = $rmsg;
                                     $errorCount++;
                                 }
-                            }
-                            else {
+                            } else {
                                 if (!checkdate($tmpData[1], $tmpData[2], $tmpData[0]) ) {
                                     $msgAry[] = $rmsg;
                                     $errorCount++;
@@ -122,7 +122,7 @@ class Validator
                             }
                             break;
                         case "tel":
-                            if (preg_match("/^(\([0-9]+\))?[0-9]+(-[0-9]+)*(#[0-9]+)?$/", $dataAry[k]) === 0) {
+                            if (preg_match("/^(\([0-9]+\))?[0-9]+(-[0-9]+)*(#[0-9]+)?$/", $dataAry[$k]) === 0) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
@@ -164,7 +164,7 @@ class Validator
                             if (!isset($r[1])){
                                 $r[1] = "/.*/";
                             }
-                            if (preg_match($r[1], $dataAry[k]) === 0) {
+                            if (preg_match($r[1], $dataAry[$k]) === 0) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
