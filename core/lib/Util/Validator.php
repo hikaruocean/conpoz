@@ -3,7 +3,7 @@ namespace Conpoz\Core\Lib\Util;
 
 class Validator
 {
-    public static function valid($ruleObj, &$dataAry) 
+    public static function valid($ruleObj, $dataAry) 
     {
         $msgAry = array();
         $rulesAry = array();

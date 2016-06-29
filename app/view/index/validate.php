@@ -4,14 +4,14 @@ $(function () {
     var validator = new Validator();
     $(document).on('click', '#goSubmit', function (e) {
         e.preventDefault();
-        // $('.err_msg').html('');
-        // var errAry = validator.valid($("#form1"));
-        // if (errAry.length != 0) {
-        //     $.each(errAry, function (k, v) {
-        //         v.object.next().html(v.errMsg);
-        //     });
-        //     return;
-        // }
+        $('.err_msg').html('');
+        var errAry = validator.valid($("#form1"));
+        if (errAry.length != 0) {
+            $.each(errAry, function (k, v) {
+                v.object.next().html(v.errMsg);
+            });
+            return;
+        }
         $("#form1").submit();
     });
 });
