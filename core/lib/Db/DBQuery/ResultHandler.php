@@ -51,4 +51,41 @@ class ResultHandler
     {
         return $this->rowCount;
     }
+
+    /**
+     * Iterator implement method 
+     */
+    
+    private $position = 0;
+
+    public function rewind() 
+    {
+
+    }
+
+    public function valid()
+    {
+        if ($this->position >= $this->rowCount) {
+            return false;
+        }
+        return true;
+    }
+
+    public function current() 
+    {
+        if (is_null($this->sth)) {
+            return false;
+        }
+        return $this->sth->fetch(\PDO::FETCH_OBJ);
+    }
+
+    public function next()
+    {
+        $this->position ++;
+    }
+
+    public function key()
+    {
+        return $this->position;
+    }
 }
