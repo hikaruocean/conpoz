@@ -42,6 +42,11 @@ class Session
         $_SESSION[$name] = $value;
     }
 
+    public function __isset ($name)
+    {
+        return isset($_SESSION[$name]);
+    }
+
     public function __unset ($name)
     {
         if (!isset($_SESSION[$name])) {
