@@ -3,6 +3,11 @@
 namespace Conpoz\Core\Lib\Db;
 class DBQuery 
 {
+    static public $bindType = array(
+        'boolean' => \PDO::PARAM_BOOL,
+        'integer' => \PDO::PARAM_INT,
+        'others' => \PDO::PARAM_STR,
+        );
     public $db = null;
     public $sth = null;
     public $success = false;
@@ -100,10 +105,14 @@ class DBQuery
         }
         $this->sth = $this->db->prepare($sql);
         foreach ($params as $k => $v) {
+            $bindType = SELF::$bindType['others'];
+            if (isset(SELF::$bindType[gettype($v)])) {
+                $bindType = SELF::$bindType[gettype($v)];
+            }
             if (is_int($k)) {
-                $this->sth->bindValue($k + 1, $v);
+                $this->sth->bindValue($k + 1, $v, $bindType);
             } else {
-                $this->sth->bindValue(':' . $k, $v);
+                $this->sth->bindValue(':' . $k, $v, $bindType);
             }
         }
         $success = $this->sth->execute();
