@@ -22,7 +22,7 @@ class DBQuery
     {
         set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
             if (strpos($errstr, 'PDO::__construct(): MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
-                throw new \Exception("mysql server has gone away", 2006);
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006);
             }
             return false;
         }, E_WARNING);
@@ -36,7 +36,7 @@ class DBQuery
         }, $this);
 
         if (empty($params['adapter']) || empty($params['dbname']) || empty($params['host']) || empty($params['username']) || empty($params['password'])) {
-            throw new \Exception("db connected miss params");
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql Db connected miss params");
         }
 
         $params['charset'] = isset($params['charset']) && !empty($params['charset']) ? $params['charset'] : 'utf8';
@@ -74,7 +74,7 @@ class DBQuery
     public function begin() 
     {
         if (!$this->success) {
-            return false;
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
         }
         $this->db->beginTransaction();
         return $this;
@@ -83,7 +83,7 @@ class DBQuery
     public function commit() 
     {
         if (!$this->success) {
-            return false;
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
         }
         return $this->db->commit();
     }
@@ -91,7 +91,7 @@ class DBQuery
     public function rollback() 
     {
         if (!$this->success) {
-            return false;
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
         }
         return $this->db->rollBack();
     }
@@ -99,9 +99,11 @@ class DBQuery
     public function execute($sql, array $params = array()) 
     {
         $this->sth = null;
-        if (!$this->success || empty($sql)) 
-        {
-            return false;
+        if (!$this->success) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
+        } 
+        if (empty($sql)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement is required');
         }
         $this->sth = $this->db->prepare($sql);
         foreach ($params as $k => $v) {
@@ -131,8 +133,14 @@ class DBQuery
 
     public function insert($table, array $data = array()) 
     {
-        if (!$this->success || empty($table) || empty($data)) {
-            return false;
+        if (!$this->success) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
+        } 
+        if (empty($data)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql insert data is required');
+        } 
+        if (empty($table)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
         }
         $this->table = $table;
         $this->data = $data;
@@ -157,13 +165,19 @@ class DBQuery
         //do nothing;
     }
 
-    public function update($table, array $data, $conditions = '1', array $params = array()) 
+    public function update($table, array $data, $conditions = null, array $params = array()) 
     {
-        if (!$this->success || empty($data) || empty($table)) {
-            return false;
+        if (!$this->success) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
+        } 
+        if (empty($data)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql update data is required');
+        } 
+        if (empty($table)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
         }
         if (is_null($conditions)) {
-            $conditions = '1';
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement conditions is required');
         }
         $this->table = $table;
         $this->data = $data;
@@ -191,13 +205,16 @@ class DBQuery
         //do nothing;
     }
 
-    public function delete($table, $conditions = '1', array $params = array()) 
+    public function delete($table, $conditions = null, array $params = array()) 
     {
-        if (!$this->success || empty($table)) {
-            return false;
+        if (!$this->success) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
+        }
+        if (empty($table)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
         }
         if (is_null($conditions)) {
-            $conditions = '1';
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('SQL statement conditions is required');
         }
         $this->table = $table;
         $this->beforeDelete();
