@@ -105,7 +105,7 @@ class DBQuery
         if (empty($sql)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement is required');
         }
-        $this->sth = $this->db->prepare($sql);
+        $this->sth = $this->db->prepare($sql);  
         foreach ($params as $k => $v) {
             $bindType = SELF::$bindType['others'];
             if (isset(SELF::$bindType[gettype($v)])) {

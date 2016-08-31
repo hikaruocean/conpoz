@@ -1,7 +1,7 @@
 <?php 
 namespace Conpoz\Core\Lib\Db\DBQuery;
 
-class ResultHandler
+class ResultHandler  implements \Iterator
 {
     public $success = false;
     public $sth = null;
@@ -30,6 +30,14 @@ class ResultHandler
             return false;
         }
         return $this->sth->fetch(\PDO::FETCH_OBJ);
+    }
+
+    public function fetchAll()
+    {
+        if (is_null($this->sth)) {
+            return false;
+        }
+        return $this->sth->fetchAll(\PDO::FETCH_OBJ);
     }
 
     public function success() 
