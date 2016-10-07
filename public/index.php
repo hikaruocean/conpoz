@@ -6,7 +6,7 @@ try {
     define('CORE_PATH', realpath(__DIR__ . '/../core'));
 
     $config = require(APP_PATH . '/conf/config.php');
-    require(CORE_PATH . '/include/envInit.php');
+    require(APP_PATH . '/conf/envInit.php');
     require(CORE_PATH . '/include/autoLoader.php');
     require(CONPOZ_PATH . '/vendor/autoload.php');
     $bag = require(APP_PATH . '/conf/service.php');
