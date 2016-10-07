@@ -16,7 +16,14 @@ $bag->req = function () {
 };
 
 $bag->sess = function () {
-    session_set_cookie_params(0, '/', '.conpoz.lo');
+    /**
+     *  cookie expireTime = 0,
+     *  path = /,
+     *  domain = *.conpoz.lo,
+     *  access need https = false, 
+     *  httpOnly = true (javascript can't access)
+     * */
+    session_set_cookie_params(0, '/', '.conpoz.lo', false, true);
     return new \Conpoz\Core\Lib\Util\Session();
 };
 
