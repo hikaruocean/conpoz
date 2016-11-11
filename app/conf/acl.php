@@ -1,5 +1,5 @@
 <?php 
-$closure = function ($db, &$config) {
+$closure = function ($db, $config) {
     $acl = new \Conpoz\Core\Lib\Util\Acl();
     foreach ($config['ACL']['publicResources'] as $resourceAry) {
         $acl->allow($config['ACL']['publicRole'], $resourceAry[0], $resourceAry[1]);
