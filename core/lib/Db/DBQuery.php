@@ -80,12 +80,30 @@ class DBQuery
         return $this;
     }
 
+    protected function beforeCommit()
+    {
+        //do nothign
+    }
+
     public function commit() 
     {
         if (!$this->success) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
         }
-        return $this->db->commit();
+        $this->beforeCommit();
+        $return = $this->db->commit();
+        $this->afterCommit($return);
+        return $return;
+    }
+
+    protected function afterCommit($success)
+    {
+        //do nothign
+    }
+
+    protected function beforeRollback()
+    {
+        //do nothign
     }
 
     public function rollback() 
@@ -93,7 +111,15 @@ class DBQuery
         if (!$this->success) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db is not connected');
         }
-        return $this->db->rollBack();
+        $this->beforeRollback();
+        $return = $this->db->rollBack();
+        $this->afterRollback($return);
+        return $return;
+    }
+
+    protected function afterRollback($success)
+    {
+        //do nothign
     }
 
     public function execute($sql, array $params = array()) 
@@ -151,11 +177,11 @@ class DBQuery
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
         $rh = $this->execute($sql, $this->data);
         $rh->lastInsertId = $this->db->lastInsertId();
-        $this->afterInsert();
+        $this->afterInsert($rh);
         return $rh;
     }
 
-    protected function afterInsert ()
+    protected function afterInsert ($rh)
     {
         //do nothing;
     }
@@ -191,11 +217,11 @@ class DBQuery
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, array_merge($paramsAry, $params));
-        $this->afterUpdate();
+        $this->afterUpdate($rh);
         return $rh;
     }
 
-    protected function afterUpdate() 
+    protected function afterUpdate($rh) 
     {
         //do nothing;
     }
@@ -220,11 +246,11 @@ class DBQuery
         $this->beforeDelete();
         $sql = 'DELETE FROM ' . $table . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, $params);
-        $this->afterDelete();
+        $this->afterDelete($rh);
         return $rh;
     }
 
-    protected function afterDelete ()
+    protected function afterDelete ($rh)
     {
         //do nothing;
     }
