@@ -3,7 +3,7 @@ namespace Conpoz\Core\Lib\Util;
 
 class Tool
 {
-    public static function force(&$data, $key = null, $default = '') {
+    public static function force(&$data, $key = null, $default = null) {
         $return = $default;
         switch (gettype($data)) {
             case 'array':
