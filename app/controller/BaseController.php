@@ -8,7 +8,7 @@ abstract class BaseController extends \stdClass
         /**
          * ACL
          */
-        if (!$bag->sess->user_id) {
+        if (!$bag->sess->user_id || !$bag->sess->user_role) {
             $roles = ['guest'];
         } else {
             $roles = ['admin'];
