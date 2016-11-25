@@ -160,6 +160,24 @@ class Validator
                                 $errorCount++;
                             }
                             break;
+                        case "min-range":
+                            if (!isset($r[1])) {
+                                break;
+                            }
+                            if ((float) $dataAry[$k] < (float) $r[1]) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
+                            }
+                            break;
+                        case "max-range":
+                            if (!isset($r[1])) {
+                                break;
+                            }
+                            if ((float) $dataAry[$k] > (float) $r[1]) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
+                            }
+                            break;
                         case "regex-rule":
                             if (!isset($r[1])){
                                 $r[1] = "/.*/";

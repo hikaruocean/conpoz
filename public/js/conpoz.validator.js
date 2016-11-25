@@ -181,6 +181,28 @@ Validator.prototype.valid = function (jqForm) {
                             return false;
                         }
                         break;
+                    case 'min-range':
+                        var vData = _thisElem.attr('data-' + v2)
+                        if (!vData) {
+                            break;
+                        }
+                        if (parseFloat(_thisElem.val()) < parseFloat(vData)) {
+                            var errMsg = _thisElem.attr('data-err-msg-' + v2);
+                            msgAry.push({object: _thisElem, 'errMsg': errMsg});
+                            return false;
+                        }
+                        break;
+                    case 'max-range':
+                        var vData = _thisElem.attr('data-' + v2)
+                        if (!vData) {
+                            break;
+                        }
+                        if (parseFloat(_thisElem.val()) > parseFloat(vData)) {
+                            var errMsg = _thisElem.attr('data-err-msg-' + v2);
+                            msgAry.push({object: _thisElem, 'errMsg': errMsg});
+                            return false;
+                        }
+                        break;
                     default:
                     //case 'regex-rule-{n}':
                         var reg = /^regex-rule-/;
