@@ -206,13 +206,17 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement conditions is required');
         }
         $this->table = $table;
+        if (is_array($table)) {
+            $table = implode(', ', $table);
+        }
         $this->data = $data;
         $this->beforeUpdate();
         $updateStr = '';
         $paramsAry = array();
         foreach ($this->data as $columnName => $columnValue) {
-            $updateStr .= ' ' . $columnName . ' =  :d_' . $columnName . ',';
-            $paramsAry['d_' . $columnName] = $columnValue;
+            $bindColumnName = str_replace('.', '_', $columnName);
+            $updateStr .= ' ' . $columnName . ' =  :d_' . $bindColumnName . ',';
+            $paramsAry['d_' . $bindColumnName] = $columnValue;
         }
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
@@ -243,8 +247,11 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('SQL statement conditions is required');
         }
         $this->table = $table;
+        if (is_array($table)) {
+            $table = implode(', ', $table);
+        }
         $this->beforeDelete();
-        $sql = 'DELETE FROM ' . $table . ' WHERE ' . $conditions;
+        $sql = 'DELETE ' . $table . ' FROM ' . $table . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, $params);
         $this->afterDelete($rh);
         return $rh;
