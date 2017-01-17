@@ -55,6 +55,7 @@ class DBQuery
         }
         catch (\PDOException $e) {
             $this->errorInfo = $e->getMessage();
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception($this->errorInfo);
             return false;
         }
         $this->success = true;
@@ -144,6 +145,9 @@ class DBQuery
             }
         }
         $success = $this->sth->execute();
+        if (!$success) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception($this->sth->errorInfo());
+        }
         return new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
             'success' => $success,
             'sth' => $this->sth,
