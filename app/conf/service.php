@@ -7,6 +7,9 @@ $bag->dbquery = function () use (&$config) {
     if (!$db->success()) {
     	throw new \Exception($db->error());
     }
+    $db->setSqlErrorHandler(function ($rh) {
+        throw new \Conpoz\Core\Lib\Db\DBQuery\Exception(json_encode($rh->error()));
+    });
     return $db;
 };
 

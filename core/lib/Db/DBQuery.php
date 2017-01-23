@@ -15,6 +15,7 @@ class DBQuery
     private $dsn = null;
     private $username = null;
     private $password = null;
+    private $sqlErrorHandler = null;
     protected $table;
     protected $data;
 
@@ -60,6 +61,11 @@ class DBQuery
         }
         $this->success = true;
         return true;
+    }
+
+    public function setSqlErrorHandler ($function)
+    {
+        $this->sqlErrorHandler = $function;
     }
 
     public function success() 
@@ -145,15 +151,16 @@ class DBQuery
             }
         }
         $success = $this->sth->execute();
-        if (!$success) {
-            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception($this->sth->errorInfo());
-        }
-        return new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
+        $rh = new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
             'success' => $success,
             'sth' => $this->sth,
             'error' => $this->sth->errorInfo(),
             'rowCount' => $this->sth->rowCount()
         ));
+        if (!$success && !is_null($this->sqlErrorHandler)) {
+            $this->sqlErrorHandler->__invoke($rh);
+        }
+        return $rh;
     }
 
     protected function beforeInsert() 
