@@ -86,4 +86,24 @@ class Index extends \stdClass
             echo 'matched!';
         }
     }
+
+    public function delAction ($bag)
+    {
+        $rh = $bag->dbquery->delete(array('t1', 't2'), "t1.id = t2.t1_id AND t1.id = :id", array('id' => 1));
+        if (!$rh->success()) {
+            var_dump($rh);
+        } else {
+            echo 'success';
+        }
+    }
+
+    public function updateAction($bag)
+    {
+        $rh = $bag->dbquery->update(array('t1', 't2'), array('t1.name' => 'zzz', 't2.name' => 'xxx'), "t1.id = t2.t1_id AND t1.id = :id", array('id' => 2));
+        if (!$rh->success()) {
+            var_dump($rh);
+        } else {
+            echo 'success';
+        }
+    }
 }
