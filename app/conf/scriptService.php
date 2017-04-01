@@ -5,7 +5,7 @@ $bag->config = $config;
 $bag->dbquery = function () use (&$config) {
     $db = new \Conpoz\Core\Lib\Db\DBQuery($config['db']);
     if (!$db->success()) {
-    	throw new \Exception($db->error());
+        throw new \Exception($db->error());
     }
     $db->setSqlErrorHandler(function ($rh) {
         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception(json_encode($rh->error()));
@@ -13,12 +13,12 @@ $bag->dbquery = function () use (&$config) {
     return $db;
 };
 
-$bag->req = function () {
-    $req = new \Conpoz\Core\Lib\Util\Request();
-    return $req;
-};
+// $bag->req = function () {
+//     $req = new \Conpoz\Core\Lib\Util\Request();
+//     return $req;
+// };
 
-$bag->sess = function () {
+// $bag->sess = function () {
     /**
      *  cookie expireTime = 0,
      *  path = /,
@@ -26,9 +26,9 @@ $bag->sess = function () {
      *  access need https = false, 
      *  httpOnly = true (javascript can't access)
      * */
-    session_set_cookie_params(0, '/', '.conpoz.lo', false, true);
-    return new \Conpoz\Core\Lib\Util\Session();
-};
+//     session_set_cookie_params(0, '/', '.conpoz.lo', false, true);
+//     return new \Conpoz\Core\Lib\Util\Session();
+// };
 
 $bag->mem = function () use (&$config) {
     $mem = new \memcached();
@@ -37,9 +37,9 @@ $bag->mem = function () use (&$config) {
     return $mem;
 };
 
-$bag->imgMng = function () {
-    return new \Conpoz\Core\Lib\Util\ImageManager();
-};
+// $bag->imgMng = function () {
+//     return new \Conpoz\Core\Lib\Util\ImageManager();
+// };
 
 $bag->net = function () {
     return new \Conpoz\Core\Lib\Util\Network();
