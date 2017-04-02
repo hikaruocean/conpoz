@@ -1,24 +1,31 @@
-<?php 
+<?php
 namespace Conpoz\App\Controller;
 
 class Index extends \stdClass
 {
-    public function indexAction ($bag) 
+    public function indexAction ($bag)
     {
+        /**
+        * use service bag
+        */
         var_dump($bag->req->getQuery(array('name', 'go', 'sex')));
-        
+        /**
+        * use static getService
+        */
+        $req = \Conpoz\Core\Lib\Util\Container::getService('req');
+        var_dump($req->getQuery(array('name', 'go', 'sex')));
         /**
          *  version 1
          *  query db in controller
          */
         // $rh = $bag->dbquery->execute("SELECT * FROM questions WHERE 1");
-        
+
         /**
         * version 2
         * query db by call model (use magic function __get())
         */
         // $rh = $this->model->Questions->getListRh();
-        
+
         /**
          *  version 3
          *  query db by call model (use loader function load($modelName, $contructData = null))
@@ -26,7 +33,7 @@ class Index extends \stdClass
          */
         $qModel = $this->model->load('Questions');
         $rh = $qModel->getListRh();
-        
+
         /**
          * render view
          */
@@ -52,7 +59,7 @@ class Index extends \stdClass
         }
     }
 
-    public function sessionAction () 
+    public function sessionAction ()
     {
         var_dump($this->bag->sess->id);
         $this->bag->sess->id = rand(0, 9);
@@ -62,7 +69,7 @@ class Index extends \stdClass
         $this->bag->sess->truncate();
     }
 
-    public function curlAction () 
+    public function curlAction ()
     {
         $content = $this->bag->net->httpRequest('GET', 'http://www.onlypet.com.tw');
         var_dump($content);
