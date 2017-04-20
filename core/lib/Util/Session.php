@@ -19,9 +19,14 @@ class Session
         $_SESSION = array();
     }
 
-    public function  forceSet(array $data = array()) 
+    public function import (array $data = array()) 
     {
         $_SESSION = $data;
+    }
+    
+    public function export ()
+    {
+        return $_SESSION;
     }
 
     public function dump()
