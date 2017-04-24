@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 namespace Conpoz\Core\Lib\Mvc;
 
-class App extends \stdClass
+class App
 {
     public $config;
     public $controllerName;
@@ -57,7 +57,7 @@ class App extends \stdClass
         /**
          * Gen MVC structure
          */
-        
+
         $this->controllerName = $controller;
         $this->actionName = $action;
         $this->controller = $controllerObject;

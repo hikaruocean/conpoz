@@ -1,7 +1,7 @@
 <?php
 namespace Conpoz\App\Controller;
 
-class Index extends \stdClass
+class Index
 {
     public function indexAction ($bag)
     {

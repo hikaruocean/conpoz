@@ -1,7 +1,7 @@
-<?php 
+<?php
 namespace Conpoz\App\Controller;
 
-class Error extends \stdClass
+class Error
 {
     public function http404Action () {
         echo 'hello 404!';

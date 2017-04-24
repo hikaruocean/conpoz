@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 namespace Conpoz\Core\Lib\Script;
 
-class App extends \stdClass
+class App
 {
     public $config;
     public $taskName;
@@ -24,7 +24,7 @@ class App extends \stdClass
         }
         $routeInfo = explode('::', $argv[1]);
         if (count($routeInfo) != 2) {
-            throw new \Exception('TASK::ACTION ERROR' . PHP_EOL);   
+            throw new \Exception('TASK::ACTION ERROR' . PHP_EOL);
         }
         $this->dispatch($routeInfo[0], $routeInfo[1]);
     }
@@ -33,19 +33,19 @@ class App extends \stdClass
     {
         $task = ucfirst($task);
         if (!class_exists('Conpoz\\App\\Task\\' . $task)) {
-            throw new \Exception('TASK NOT FOUND' . PHP_EOL);   
+            throw new \Exception('TASK NOT FOUND' . PHP_EOL);
         } else {
             $taskClass = '\\Conpoz\\App\\Task\\' . $task;
             $taskObject = new $taskClass();
             if (!method_exists($taskObject, $action . 'Action')) {
-                throw new \Exception('ACTION NOT FOUND' . PHP_EOL);   
+                throw new \Exception('ACTION NOT FOUND' . PHP_EOL);
             }
         }
 
         /**
          * Gen Script structure
          */
-        
+
         $this->taskName = $task;
         $this->actionName = $action;
         $this->task = $taskObject;

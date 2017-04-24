@@ -1,7 +1,7 @@
-<?php 
+<?php
 namespace Conpoz\App\Controller;
 
-abstract class BaseController extends \stdClass
+abstract class BaseController
 {
     public function init($bag)
     {
@@ -31,7 +31,7 @@ abstract class BaseController extends \stdClass
             if ($allow === true) { //有一個 role 能使用 currentController/Action 就允許進入
                 break;
             }
-        }   
+        }
 
         if ($allow !== true) { //處理未授權
             $this->app->dispatch('Index', 'index');

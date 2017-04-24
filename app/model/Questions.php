@@ -1,7 +1,7 @@
-<?php 
+<?php
 namespace Conpoz\App\Model;
 
-class Questions extends \stdClass
+class Questions
 {
     public function getListRh()
     {
