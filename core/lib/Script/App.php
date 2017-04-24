@@ -19,6 +19,7 @@ class App
          * Gen taskObject
          */
         $this->config = $config;
+        $this->argv = &$argv;
         if (!isset($argv[1]) || empty($argv[1])) {
             throw new \Exception('WE NEET TASK::ACTION PARAMETER' . PHP_EOL);
         }
