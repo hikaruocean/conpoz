@@ -12,13 +12,13 @@ class App
         $this->bag = $bag;
     }
 
-    public function run(&$config = null, &$argv)
+    public function run($config = null, &$argv)
     {
         /**
          * get task, get action
          * Gen taskObject
          */
-        $this->config = &$config;
+        $this->config = $config;
         if (!isset($argv[1]) || empty($argv[1])) {
             throw new \Exception('WE NEET TASK::ACTION PARAMETER' . PHP_EOL);
         }

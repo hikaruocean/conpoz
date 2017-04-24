@@ -1,8 +1,8 @@
 <?php 
 $closure = function ($db, $config) {
     $acl = new \Conpoz\Core\Lib\Util\Acl();
-    foreach ($config['ACL']['publicResources'] as $resourceAry) {
-        $acl->allow($config['ACL']['publicRole'], $resourceAry[0], $resourceAry[1]);
+    foreach ($config->ACL['publicResources'] as $resourceAry) {
+        $acl->allow($config->ACL['publicRole'], $resourceAry[0], $resourceAry[1]);
     }
 
     $adminsId = array();
@@ -20,7 +20,7 @@ $closure = function ($db, $config) {
         /**
          * grant all role to public resource
          */
-        foreach ($config['ACL']['publicResources'] as $resourceAry) {
+        foreach ($config->ACL['publicResources'] as $resourceAry) {
             $acl->allow($role->role_id, $resourceAry[0], $resourceAry[1]);
         }
     }

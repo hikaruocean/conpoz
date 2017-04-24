@@ -2,8 +2,8 @@
 $bag = new \Conpoz\Core\Lib\Util\Container();
 
 $bag->config = $config;
-$bag->dbquery = function () use (&$config) {
-    $db = new \Conpoz\Core\Lib\Db\DBQuery($config['db']);
+$bag->dbquery = function () use ($config) {
+    $db = new \Conpoz\Core\Lib\Db\DBQuery($config->db);
     if (!$db->success()) {
     	throw new \Exception($db->error());
     }
@@ -30,10 +30,10 @@ $bag->sess = function () {
     return new \Conpoz\Core\Lib\Util\Session();
 };
 
-$bag->mem = function () use (&$config) {
+$bag->mem = function () use ($config) {
     $mem = new \memcached();
     $mem->setOption(\Memcached::OPT_PREFIX_KEY, 'conpoz.lo.');
-    $mem->addServer($config['mem']['host'], $config['mem']['port']);
+    $mem->addServer($config->mem['host'], $config->mem['port']);
     return $mem;
 };
 

@@ -1,7 +1,7 @@
 <?php 
 spl_autoload_register(function ($class) use ($config) {
     $fallbackDirsPsr4 = array();
-    foreach ($config['autoloadNamespace'] as $prefix => $paths) {
+    foreach ($config->autoloadNamespace as $prefix => $paths) {
         if (!$prefix) {
             $fallbackDirsPsr4 = (array) $paths;
         } else {
