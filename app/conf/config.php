@@ -18,7 +18,7 @@ return array(
         'dbname' => 'hikaru',
         'host' => '127.0.0.1',
         'username' => 'root',
-        'password' => 'hikaru'
+        'password' => 'qeksnopre'
         ),
     'mem' => array(
         'host' => '127.0.0.1',

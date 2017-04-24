@@ -11,6 +11,8 @@ class DBQuery
     public $db = null;
     public $sth = null;
     public $success = false;
+    public $deadlockRetryTimes = 3;
+    public $deadlockUsleepTime = 300000; //0.3s
     private $errorInfo = null;
     private $dsn = null;
     private $username = null;
@@ -150,7 +152,30 @@ class DBQuery
                 $this->sth->bindValue(':' . $k, $v, $bindType);
             }
         }
-        $success = $this->sth->execute();
+        
+        /**
+        * execute and handle deadlock, and redo for setting times
+        **/
+        $retry = 0;
+        while ($retry <= $this->deadlockRetryTimes) {
+            try {
+                $success = $this->sth->execute();
+                /**
+                * executed and no exception;
+                **/
+                break;
+            } catch (\PDOException $e) {
+                /**
+                * $e->errorInfo[0]==40001 (ISO/ANSI) Serialization failure, e.g. timeout or deadlock;
+                * $e->errorInfo[1]==1213 (MySQL SQLSTATE) ER_LOCK_DEADLOCK
+                */
+                if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
+                    $retry ++;
+                    usleep($this->deadlockUsleepTime);
+                }
+            }
+        }
+        
         $rh = new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
             'success' => $success,
             'sth' => $this->sth,
