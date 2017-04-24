@@ -1,24 +1,24 @@
-<?php 
+<?php
 namespace Conpoz\App\Controller;
 
 class Index extends \stdClass
 {
-    public function indexAction ($bag) 
+    public function indexAction ($bag)
     {
         var_dump($bag->req->getQuery(array('name', 'go', 'sex')));
-        
+
         /**
          *  version 1
          *  query db in controller
          */
         // $rh = $bag->dbquery->execute("SELECT * FROM questions WHERE 1");
-        
+
         /**
         * version 2
         * query db by call model (use magic function __get())
         */
         // $rh = $this->model->Questions->getListRh();
-        
+
         /**
          *  version 3
          *  query db by call model (use loader function load($modelName, $contructData = null))
@@ -26,7 +26,7 @@ class Index extends \stdClass
          */
         $qModel = $this->model->load('Questions');
         $rh = $qModel->getListRh();
-        
+
         /**
          * render view
          */
@@ -52,17 +52,33 @@ class Index extends \stdClass
         }
     }
 
-    public function sessionAction () 
+    public function sessionAction ($bag)
     {
-        var_dump($this->bag->sess->id);
-        $this->bag->sess->id = rand(0, 9);
-        var_dump($this->bag->sess->id);
-        $this->bag->sess->forceSet(array('name' => 'hikaru', 'age' => '99'));
+        $bag->sess;
+        echo '$_SESSION<br />';
         var_dump($_SESSION);
-        $this->bag->sess->truncate();
+        echo '<br />';
+        echo '$bag->sess<br />';
+        var_dump($bag->sess);
+        $bag->sess->begin();
+        $bag->sess->list[] = rand(0, 9);
+        echo '<br />';
+        echo '$bag->sess change to<br />';
+        var_dump($bag->sess);
+        $bag->sess->truncate();
+        $bag->sess->commit();
+        $bag->sess->begin();
+        $bag->sess->go = 'go' . rand(0, 9);
+        $bag->sess->commit();
+        $bag->sess->begin();
+        $bag->sess->tt = 'tt';
+        $bag->sess->rollback();
+        echo '<br />';
+        $bag->sess->import(array(1 => 'a', 2 => 'b'));
+        var_dump($bag->sess->export());
     }
 
-    public function curlAction () 
+    public function curlAction ()
     {
         $content = $this->bag->net->httpRequest('GET', 'http://www.onlypet.com.tw');
         var_dump($content);

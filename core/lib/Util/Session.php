@@ -1,58 +1,81 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Util;
 
 class Session
 {
-    public function __construct() 
+    public static $autoCommit = true;
+    public function __construct()
     {
+        register_shutdown_function(function ($obj) {
+            if ($obj->getAutoCommitStatus() === true) {
+                $obj->commit();
+            }
+        }, $this);
+
         $this->start();
+        $this->rollback ();
     }
 
     public function start()
     {
-        session_start();   
-    }
-
-    public function truncate () 
-    {
-        session_destroy();
-        $_SESSION = array();
-    }
-
-    public function  forceSet(array $data = array()) 
-    {
-        $_SESSION = $data;
-    }
-
-    public function dump()
-    {
-        return $_SESSION;
-    }
-
-    public function __get ($name) 
-    {
-        if (!isset($_SESSION[$name])) {
-            return null;
-        }
-        return $_SESSION[$name];
-    }
-
-    public function __set ($name, $value)
-    {
-        $_SESSION[$name] = $value;
-    }
-
-    public function __isset ($name)
-    {
-        return isset($_SESSION[$name]);
-    }
-
-    public function __unset ($name)
-    {
-        if (!isset($_SESSION[$name])) {
-            return false;
-        }
-        unset($_SESSION[$name]);
+        session_start();
         return true;
     }
+
+    public function begin ()
+    {
+        self::$autoCommit = false;
+        return true;
+    }
+
+    public function rollback ()
+    {
+        if (self::$autoCommit === false) {
+            $this->truncate();
+            foreach ($_SESSION as $key => $val) {
+                $this->{$key} = $val;
+            }
+            self::$autoCommit = true;
+            return true;
+        }
+        return false;
+    }
+
+    public function commit ()
+    {
+        $_SESSION = get_object_vars($this);
+        self::$autoCommit = true;
+        return true;
+    }
+
+    public function truncate ()
+    {
+        foreach (get_object_vars($this) as $key => $val) {
+            unset($this->{$key});
+        }
+        return true;
+    }
+
+    public function getAutoCommitStatus ()
+    {
+        return self::$autoCommit;
+    }
+
+    public function import ($data)
+    {
+        if (!is_array($data) && !is_object($data)) {
+            return false;
+        }
+        $this->truncate();
+        foreach ($data as $key => $val) {
+            $this->{$key} = $val;
+        }
+        return true;
+    }
+
+    public function export ()
+    {
+        return get_object_vars($this);
+    }
+
 }
