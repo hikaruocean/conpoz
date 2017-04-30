@@ -230,6 +230,8 @@ class DBQuery
                 if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
                     $retry ++;
                     usleep($this->deadlockUsleepTime);
+                } else {
+                    throw $e;
                 }
             }
         }
