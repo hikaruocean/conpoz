@@ -16,7 +16,9 @@ class DBQuery
     public $success = array(false, false);
     public $deadlockRetryTimes = 3;
     public $deadlockUsleepTime = 300000; //0.3s
-    public $focusMaster = false;
+    public $masterDisableLoadbalance = true;
+    private $singleResoure = true;
+    private $focusMaster = false;
     private $errorInfo = null;
     private $dsnSet = array();
     private $username = array();
@@ -64,6 +66,7 @@ class DBQuery
                         $this->username[$slaveIndex] = $slaveVal['username'];
                         $this->password[$slaveIndex] = $slaveVal['password'];
                     }
+                    $this->singleResoure = false;
                     break;
                 default:
                     throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql Db config format error");
@@ -81,7 +84,11 @@ class DBQuery
                     ));
                     break;
                 case SELF::SLAVE_RESOURCE_ID:
-                    $slaveIndex = rand(1, count($this->dsnSet) - 1);
+                    if ($this->masterDisableLoadbalance) {
+                        $slaveIndex = mt_rand(1, count($this->dsnSet) - 1);
+                    } else {
+                        $slaveIndex = mt_rand(0, count($this->dsnSet) - 1);
+                    }
                     $this->db[SELF::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
                         \PDO::ATTR_PERSISTENT => true
                     ));
@@ -170,15 +177,19 @@ class DBQuery
         }
         
         $resourceIndex = null;
-        switch ($dbEnv) {
-            case SELF::MASTER_RESOURCE_ID:
+        if ($this->singleResoure) {
+            $resourceIndex = SELF::MASTER_RESOURCE_ID;
+        } else {
+            switch ($dbEnv) {
+                case SELF::MASTER_RESOURCE_ID:
                 $resourceIndex = SELF::MASTER_RESOURCE_ID;
                 $this->focusMaster = true;
                 break;
-            case SELF::SLAVE_RESOURCE_ID:
+                case SELF::SLAVE_RESOURCE_ID:
                 $resourceIndex = SLAVE_RESOURCE_ID;
                 break;
-            default:
+                default: 
+                // case SELF::AUTO_RESOURCE_ID:
                 if ($this->focusMaster) {
                     $resourceIndex = SELF::MASTER_RESOURCE_ID;
                 } else {
@@ -189,6 +200,7 @@ class DBQuery
                         $this->focusMaster = true;
                     }
                 }
+            }
         }
         
         $this->sth = null;
