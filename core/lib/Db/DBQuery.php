@@ -16,7 +16,14 @@ class DBQuery
     public $success = array(false, false);
     public $deadlockRetryTimes = 3;
     public $deadlockUsleepTime = 300000; //0.3s
+    
+    /**
+    * set following attr before DBQUERY::connect()
+    **/
     public $masterDisableLoadbalance = true;
+    public $persistent = true;
+    public $emulatePrepare = true;
+    
     private $singleResoure = true;
     private $focusMaster = false;
     private $errorInfo = null;
@@ -80,8 +87,9 @@ class DBQuery
             switch ($dbEnv) {
                 case SELF::MASTER_RESOURCE_ID:
                     $this->db[SELF::MASTER_RESOURCE_ID] = new \PDO($this->dsnSet[0], $this->username[0], $this->password[0], array(
-                        \PDO::ATTR_PERSISTENT => true
+                        \PDO::ATTR_PERSISTENT => $this->persistent
                     ));
+                    $this->db[SELF::MASTER_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
                     break;
                 case SELF::SLAVE_RESOURCE_ID:
                     if ($this->masterDisableLoadbalance) {
@@ -90,8 +98,9 @@ class DBQuery
                         $slaveIndex = mt_rand(0, count($this->dsnSet) - 1);
                     }
                     $this->db[SELF::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
-                        \PDO::ATTR_PERSISTENT => true
+                        \PDO::ATTR_PERSISTENT => $this->persistent
                     ));
+                    $this->db[SELF::SLAVE_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
                     break;
             }
         } catch (\PDOException $e) {
@@ -182,24 +191,27 @@ class DBQuery
         } else {
             switch ($dbEnv) {
                 case SELF::MASTER_RESOURCE_ID:
-                $resourceIndex = SELF::MASTER_RESOURCE_ID;
-                $this->focusMaster = true;
-                break;
+                    $resourceIndex = SELF::MASTER_RESOURCE_ID;
+                    $this->focusMaster = true;
+                    break;
                 case SELF::SLAVE_RESOURCE_ID:
-                $resourceIndex = SLAVE_RESOURCE_ID;
-                break;
+                    $resourceIndex = SLAVE_RESOURCE_ID;
+                    break;
                 default: 
                 // case SELF::AUTO_RESOURCE_ID:
-                if ($this->focusMaster) {
-                    $resourceIndex = SELF::MASTER_RESOURCE_ID;
-                } else {
-                    if (stripos(trim($sql), 'SELECT') === 0) {
-                        $resourceIndex = SELF::SLAVE_RESOURCE_ID;
-                    } else {
+                    if ($this->focusMaster) {
                         $resourceIndex = SELF::MASTER_RESOURCE_ID;
-                        $this->focusMaster = true;
+                    } else {
+                        //'IN SHARE MODE', 'FOR UPDATE'
+                        if (stripos(trim($sql), 'SELECT') === 0 && !preg_match('/\s+lock\s+in\s+share\s+mode/i', $sql) && !preg_match('/\s+for\s+update/i', $sql)) {
+                            var_dump('slave');
+                            $resourceIndex = SELF::SLAVE_RESOURCE_ID;
+                        } else {
+                            var_dump('master');
+                            $resourceIndex = SELF::MASTER_RESOURCE_ID;
+                            $this->focusMaster = true;
+                        }
                     }
-                }
             }
         }
         
@@ -207,6 +219,7 @@ class DBQuery
         if (!$this->success[$resourceIndex]) {
             $this->connect($resourceIndex);
         } 
+ 
         $this->sth = $this->db[$resourceIndex]->prepare($sql);  
         foreach ($params as $k => $v) {
             $bindType = SELF::$bindType['others'];

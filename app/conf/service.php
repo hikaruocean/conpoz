@@ -4,9 +4,8 @@ $bag = new \Conpoz\Core\Lib\Util\Container();
 $bag->config = $config;
 $bag->dbquery = function () use ($config) {
     $db = new \Conpoz\Core\Lib\Db\DBQuery($config->db);
-    if (!$db->success()) {
-    	throw new \Exception($db->error());
-    }
+    $db->persistent = true;
+    $db->emulatePrepare = true;
     $db->setSqlErrorHandler(function ($rh) {
         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception(json_encode($rh->error()));
     });
