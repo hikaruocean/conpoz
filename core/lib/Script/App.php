@@ -52,7 +52,7 @@ class App
         $this->task = $taskObject;
         $taskObject->app = $this;
         $taskObject->bag = $this->bag;
-        $taskObject->model = new \Conpoz\Core\Lib\Mvc\Model($this->bag);
+        $taskObject->model = new \Conpoz\Core\Lib\Mvc\Model($this);
         if (method_exists($taskObject, 'init')) {
             if ($taskObject->init($this->bag) === false) {
                 return false;
