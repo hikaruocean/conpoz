@@ -13,7 +13,7 @@ class Session
         }, $this);
 
         $this->start();
-        $this->rollback ();
+        $this->syncFromSession();
     }
 
     public function start()
@@ -32,9 +32,7 @@ class Session
     {
         if (self::$autoCommit === false) {
             $this->truncate();
-            foreach ($_SESSION as $key => $val) {
-                $this->{$key} = $val;
-            }
+            $this->syncFromSession();
             self::$autoCommit = true;
             return true;
         }
@@ -77,5 +75,11 @@ class Session
     {
         return get_object_vars($this);
     }
-
+    
+    private function syncFromSession ()
+    {
+        foreach ($_SESSION as $key => $val) {
+            $this->{$key} = $val;
+        }
+    }
 }
