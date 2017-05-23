@@ -57,8 +57,9 @@ class DBQuery
                     if (empty($val['adapter']) || empty($val['dbname']) || empty($val['host']) || empty($val['username']) || empty($val['password'])) {
                         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql Db master miss params');
                     }
+                    $val['port'] = isset($val['port']) && !empty($val['port']) ? $val['port'] : '3306';
                     $val['charset'] = isset($val['charset']) && !empty($val['charset']) ? $val['charset'] : 'utf8';
-                    $this->dsnSet[0] = $val['adapter'] . ':dbname=' .$val['dbname'] . ';host=' . $val['host'] . ';charset=' . $val['charset'];
+                    $this->dsnSet[0] = $val['adapter'] . ':dbname=' .$val['dbname'] . ';host=' . $val['host'] . ';port=' . $val['port'] . ';charset=' . $val['charset'];
                     $this->username[0] = $val['username'];
                     $this->password[0] = $val['password'];
                     break;
@@ -68,8 +69,9 @@ class DBQuery
                             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql Db slave ' . $slaveKey . ' miss params');
                         }
                         $slaveIndex = $slaveKey + 1;
+                        $slaveVal['port'] = isset($slaveVal['port']) && !empty($slaveVal['port']) ? $slaveVal['port'] : '3306';
                         $slaveVal['charset'] = isset($slaveVal['charset']) && !empty($slaveVal['charset']) ? $slaveVal['charset'] : 'utf8';
-                        $this->dsnSet[$slaveIndex] = $slaveVal['adapter'] . ':dbname=' .$slaveVal['dbname'] . ';host=' . $slaveVal['host'] . ';charset=' . $slaveVal['charset'];
+                        $this->dsnSet[$slaveIndex] = $slaveVal['adapter'] . ':dbname=' .$slaveVal['dbname'] . ';host=' . $slaveVal['host'] . ';port=' . $slaveVal['port'] . ';charset=' . $slaveVal['charset'];
                         $this->username[$slaveIndex] = $slaveVal['username'];
                         $this->password[$slaveIndex] = $slaveVal['password'];
                     }
