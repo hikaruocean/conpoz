@@ -149,7 +149,7 @@ class Validator
                             if (!isset($r[1])) {
                                 break;
                             }
-                            if (mb_strlen($dataAry[$k],"UTF-8") > $r[1]) {
+                            if (mb_strlen($dataAry[$k],"UTF-8") > (int) $r[1]) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
@@ -158,7 +158,7 @@ class Validator
                             if (!isset($r[1])) {
                                 break;
                             }
-                            if (mb_strlen($dataAry[$k],"UTF-8") < $r[1]) {
+                            if (mb_strlen($dataAry[$k],"UTF-8") < (int) $r[1]) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
