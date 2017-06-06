@@ -163,6 +163,24 @@ class Validator
                                 $errorCount++;
                             }
                             break;
+                        case "max-byte":
+                            if (!isset($r[1])) {
+                                break;
+                            }
+                            if (strlen($dataAry[$k]) > (int) $r[1]) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
+                            }
+                            break;
+                        case "min-byte":
+                            if (!isset($r[1])) {
+                                break;
+                            }
+                            if (strlen($dataAry[$k]) < (int) $r[1]) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
+                            }
+                            break;
                         case "compare-with":
                             if (!isset($r[1])) {
                                 break;
