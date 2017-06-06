@@ -53,7 +53,9 @@ class Validator
                             }
                             break;
                         case "boolean":
-                            if ($dataAry[$k] !== "true" && $dataAry[$k] !== "false" ) {
+                            if ($dataAry[$k] === "true" || $dataAry[$k] === "false" || is_bool($dataAry[$k])) {
+                                //do nothing
+                            } else {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
@@ -86,12 +88,12 @@ class Validator
                                 break;
                             }
                             if (count($tmpData) === 2) {
-                                if(!checkdate($tmpData[1], 1, $tmpData[0])) {
+                                if(!is_numeric($tmpData[0]) || !is_numeric($tmpData[1]) || !checkdate($tmpData[1], 1, $tmpData[0])) {
                                     $msgAry[] = $rmsg;
                                     $errorCount++;
                                 }
                             } else {
-                                if (!checkdate($tmpData[1], $tmpData[2], $tmpData[0]) ) {
+                                if (!is_numeric($tmpData[0]) || !is_numeric($tmpData[1]) || !is_numeric($tmpData[2]) || !checkdate($tmpData[1], $tmpData[2], $tmpData[0]) ) {
                                     $msgAry[] = $rmsg;
                                     $errorCount++;
                                 }
@@ -103,6 +105,19 @@ class Validator
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                                 break;
+                            }
+                            if (!is_numeric($tmpData[0]) ||
+                                !is_numeric($tmpData[1]) || 
+                                !is_numeric($tmpData[2]) || 
+                                !is_numeric($tmpData[3]) || 
+                                !is_numeric($tmpData[4]) || 
+                                !is_numeric($tmpData[5]) || 
+                                (int) $tmpData[3] > 23 || 
+                                (int) $tmpData[4] > 59 || 
+                                (int) $tmpData[5] > 59 || 
+                                !checkdate($tmpData[1], $tmpData[2], $tmpData[0])) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
                             }
                             if (is_bool(strtotime($dataAry[$k]))){
                                 $msgAry[] = $rmsg;
