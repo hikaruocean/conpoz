@@ -112,14 +112,10 @@ class Validator
                                 !is_numeric($tmpData[3]) || 
                                 !is_numeric($tmpData[4]) || 
                                 !is_numeric($tmpData[5]) || 
-                                (int) $tmpData[3] > 23 || 
-                                (int) $tmpData[4] > 59 || 
-                                (int) $tmpData[5] > 59 || 
+                                (int) $tmpData[3] < 0 || (int) $tmpData[3] > 23 || 
+                                (int) $tmpData[4] < 0 || (int) $tmpData[4] > 59 || 
+                                (int) $tmpData[5] < 0 || (int) $tmpData[5] > 59 || 
                                 !checkdate($tmpData[1], $tmpData[2], $tmpData[0])) {
-                                $msgAry[] = $rmsg;
-                                $errorCount++;
-                            }
-                            if (is_bool(strtotime($dataAry[$k]))){
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
