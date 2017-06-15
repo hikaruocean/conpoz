@@ -224,7 +224,7 @@ class Validator
                             if (!is_callable($function)) {
                                 break;
                             }
-                            if (($rmsg = $function($dataAry[$k])) !== true) {
+                            if (($rmsg = $function->__invoke($dataAry[$k])) !== true) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
