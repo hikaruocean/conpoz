@@ -3,7 +3,7 @@
 --
 
 CREATE TABLE `acl_actions` (
-  `action_id` int(10) UNSIGNED NOT NULL,
+  `action_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `controller_id` int(10) UNSIGNED NOT NULL,
   `name` varchar(64) NOT NULL,
   `descript` varchar(64) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE `acl_actions` (
 --
 
 CREATE TABLE `acl_controllers` (
-  `controller_id` int(10) UNSIGNED NOT NULL,
+  `controller_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `descript` varchar(64) NOT NULL,
   `created` datetime NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE `acl_controllers` (
 --
 
 CREATE TABLE `acl_grants` (
-  `grant_id` char(15) NOT NULL,
+  `grant_id` int(10) NOT NULL AUTO_INCREMENT,
   `role_id` char(15) NOT NULL,
   `controller_id` int(10) UNSIGNED NOT NULL,
   `action_id` int(10) UNSIGNED NOT NULL,
