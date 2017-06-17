@@ -5,7 +5,7 @@ class Request
 {
     public function __construct()
     {
-        $uri = isset($_GET['_url']) ? $_GET['_url'] : '';
+        $uri = isset($_GET['_url']) ? rtrim($_GET['_url'], '/') : '';
         $uriAry = explode('/', $uri);
         array_shift($uriAry);
         foreach ($uriAry as &$param) {
