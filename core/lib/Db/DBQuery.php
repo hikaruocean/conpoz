@@ -296,7 +296,7 @@ class DBQuery
         $valuesBindStr = '(:' . implode(',:', array_keys($this->data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
         $rh = $this->execute($sql, $this->data, SELF::MASTER_RESOURCE_ID);
-        $rh->lastInsertId = $this->db->lastInsertId();
+        $rh->lastInsertId = $this->db[SELF::MASTER_RESOURCE_ID]->lastInsertId();
         $this->afterInsert($rh);
         return $rh;
     }
