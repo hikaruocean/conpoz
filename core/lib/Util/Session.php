@@ -82,4 +82,9 @@ class Session
             $this->{$key} = $val;
         }
     }
+    
+    public function __get ($key)
+    {
+        return null;
+    }
 }
