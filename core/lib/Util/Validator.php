@@ -119,10 +119,6 @@ class Validator
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
-                            if (is_bool(strtotime($dataAry[$k]))){
-                                $msgAry[] = $rmsg;
-                                $errorCount++;
-                            }
                             break;
                         case "ip":
                             if (!filter_var($dataAry[$k], FILTER_VALIDATE_IP)) {
@@ -216,6 +212,19 @@ class Validator
                                 $r[1] = "/.*/";
                             }
                             if (preg_match($r[1], $dataAry[$k]) === 0) {
+                                $msgAry[] = $rmsg;
+                                $errorCount++;
+                            }
+                            break;
+                        /**
+                        * user assign rule function
+                        * */
+                        case "function":
+                            $function = $rmsg;
+                            if (!is_callable($function)) {
+                                break;
+                            }
+                            if (($rmsg = $function->__invoke($dataAry[$k])) !== true) {
                                 $msgAry[] = $rmsg;
                                 $errorCount++;
                             }
