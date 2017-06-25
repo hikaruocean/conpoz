@@ -4,7 +4,6 @@ namespace Conpoz\Core\Lib\Util;
 class Validator
 {
     public static function valid($ruleObjAry, $dataAry) 
-    $ruleObjAry
         $msgAry = array();
         $rulesAry = array();
         $ruleErrBreak;
