@@ -149,7 +149,7 @@ Validator.prototype.valid = function (jqForm) {
                     * user assign rule value
                     * */
                     case 'max-length':
-                        var vData = _thisElem.attr('data-' + v2)
+                        var vData = _thisElem.attr('data-' + v2);
                         if (!vData) {
                             break;
                         }
@@ -160,7 +160,7 @@ Validator.prototype.valid = function (jqForm) {
                         }
                         break;
                     case 'min-length':
-                        var vData = _thisElem.attr('data-' + v2)
+                        var vData = _thisElem.attr('data-' + v2);
                         if (!vData) {
                             break;
                         }
@@ -170,8 +170,30 @@ Validator.prototype.valid = function (jqForm) {
                             return false;
                         }
                         break;
+                    case 'max-byte':
+                        var vData = _thisElem.attr('data-' + v2);
+                        if (!vData) {
+                            break;
+                        }
+                        if (_thisElem.val().length > parseInt(vData)) {
+                            var errMsg = _thisElem.attr('data-err-msg-' + v2);
+                            msgAry.push({object: _thisElem, 'errMsg': errMsg});
+                            return false;
+                        }
+                        break;
+                    case 'mix-byte':
+                        var vData = _thisElem.attr('data-' + v2);
+                        if (!vData) {
+                            break;
+                        }
+                        if (_thisElem.val().length < parseInt(vData)) {
+                            var errMsg = _thisElem.attr('data-err-msg-' + v2);
+                            msgAry.push({object: _thisElem, 'errMsg': errMsg});
+                            return false;
+                        }
+                        break;
                     case 'compare-with':
-                        var vData = _thisElem.attr('data-' + v2)
+                        var vData = _thisElem.attr('data-' + v2);
                         if (!vData) {
                             break;
                         }
@@ -182,7 +204,7 @@ Validator.prototype.valid = function (jqForm) {
                         }
                         break;
                     case 'min-range':
-                        var vData = _thisElem.attr('data-' + v2)
+                        var vData = _thisElem.attr('data-' + v2);
                         if (!vData) {
                             break;
                         }
@@ -193,7 +215,7 @@ Validator.prototype.valid = function (jqForm) {
                         }
                         break;
                     case 'max-range':
-                        var vData = _thisElem.attr('data-' + v2)
+                        var vData = _thisElem.attr('data-' + v2);
                         if (!vData) {
                             break;
                         }
@@ -202,6 +224,8 @@ Validator.prototype.valid = function (jqForm) {
                             msgAry.push({object: _thisElem, 'errMsg': errMsg});
                             return false;
                         }
+                        break;
+                    case 'function':
                         break;
                     default:
                     //case 'regex-rule-{n}':

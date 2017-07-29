@@ -30,13 +30,20 @@ abstract class ValidateRule
             $msgStr = "";
             $regCount = 1;
             foreach ($this->{$key} as $k => $v)  {
+                $r = explode(":", $k, 2);
+                switch ($r[0]) {
+                    case "regex-rule":
+                        $r[0] = $r[0] . "-" . $regCount;
+                        $regCount++;
+                        break;
+                    case "function":
+                        continue;
+                        break;
+                    default:
+                        break;
+                }
                 if (!empty($ruleStr)) {
                     $ruleStr .= " ";
-                }
-                $r = explode(":", $k, 2);
-                if ($r[0] == "regex-rule") {
-                    $r[0] = $r[0] . "-" . $regCount;
-                    $regCount++;
                 }
                 $ruleStr .= $r[0];
                 if (isset($r[1])) {
