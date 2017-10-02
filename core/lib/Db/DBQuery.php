@@ -14,6 +14,7 @@ class DBQuery
     public $db = array();
     public $sth = null;
     public $success = array(false, false);
+    public $trxWriteJobHistory = array();
     public $deadlockRetryTimes = 3;
     public $deadlockUsleepTime = 300000; //0.3s
     
@@ -135,6 +136,7 @@ class DBQuery
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
+        $this->trxWriteJobHistory = array();
         $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
         return $this;
     }
@@ -150,6 +152,7 @@ class DBQuery
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
         $this->beforeCommit();
+        $this->trxWriteJobHistory = array();
         $return = $this->db[SELF::MASTER_RESOURCE_ID]->commit();
         $this->afterCommit($return);
         return $return;
@@ -171,6 +174,7 @@ class DBQuery
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
         $this->beforeRollback();
+        $this->trxWriteJobHistory = array();
         $return = $this->db[SELF::MASTER_RESOURCE_ID]->rollBack();
         $this->afterRollback($return);
         return $return;
@@ -206,10 +210,8 @@ class DBQuery
                     } else {
                         //'IN SHARE MODE', 'FOR UPDATE'
                         if (stripos(trim($sql), 'SELECT') === 0 && !preg_match('/\s+lock\s+in\s+share\s+mode/i', $sql) && !preg_match('/\s+for\s+update/i', $sql)) {
-                            var_dump('slave');
                             $resourceIndex = SELF::SLAVE_RESOURCE_ID;
                         } else {
-                            var_dump('master');
                             $resourceIndex = SELF::MASTER_RESOURCE_ID;
                             $this->focusMaster = true;
                         }
@@ -257,6 +259,11 @@ class DBQuery
                 if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
                     $retry ++;
                     usleep($this->deadlockUsleepTime);
+                    /**
+                    * restart transaction and redo writeJobHistory
+                    */
+                    $this->begin();
+                    $this->trxWriteJobHistoryExecute();
                 } else {
                     throw $e;
                 }
@@ -273,6 +280,31 @@ class DBQuery
             $this->sqlErrorHandler->__invoke($rh);
         }
         return $rh;
+    }
+    
+    private function trxWriteJobHistoryExecute()
+    {
+        $this->sth = null;
+        if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
+            $this->connect(SELF::MASTER_RESOURCE_ID);
+        }
+        $jobDoneCount = count($this->trxWriteJobHistory) - 1;
+        for ($i = 0 ; $i <= $jobDoneCount ; $i++) {
+            $job = $this->trxWriteJobHistory[$i];
+            $this->sth = $this->db[SELF::MASTER_RESOURCE_ID]->prepare($job['sql']);  
+            foreach ($job['data'] as $k => $v) {
+                $bindType = SELF::$bindType['others'];
+                if (isset(SELF::$bindType[gettype($v)])) {
+                    $bindType = SELF::$bindType[gettype($v)];
+                }
+                if (is_int($k)) {
+                    $this->sth->bindValue($k + 1, $v, $bindType);
+                } else {
+                    $this->sth->bindValue(':' . $k, $v, $bindType);
+                }
+            }
+            $this->sth->execute();
+        }
     }
 
     protected function beforeInsert() 
@@ -295,6 +327,7 @@ class DBQuery
         $columnsStr = '(' . $columnsStr . ')';
         $valuesBindStr = '(:' . implode(',:', array_keys($this->data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
+        array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $this->data));
         $rh = $this->execute($sql, $this->data, SELF::MASTER_RESOURCE_ID);
         $rh->lastInsertId = $this->db[SELF::MASTER_RESOURCE_ID]->lastInsertId();
         $this->afterInsert($rh);
@@ -335,9 +368,11 @@ class DBQuery
             $updateStr .= ' ' . $columnName . ' =  :d_' . $bindColumnName . ',';
             $paramsAry['d_' . $bindColumnName] = $columnValue;
         }
+        $bindData = array_merge($paramsAry, $params);
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
-        $rh = $this->execute($sql, array_merge($paramsAry, $params), SELF::MASTER_RESOURCE_ID);
+        array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $bindData));
+        $rh = $this->execute($sql, $bindData, SELF::MASTER_RESOURCE_ID);
         $this->afterUpdate($rh);
         return $rh;
     }
