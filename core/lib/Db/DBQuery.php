@@ -6,6 +6,15 @@ class DBQuery
     const AUTO_RESOURCE_ID = -1;
     const MASTER_RESOURCE_ID = 0;
     const SLAVE_RESOURCE_ID = 1;
+    const TIMING_BEFORE = 0;
+    const TIMING_AFTER = 1;
+    const ACTION_EXECUTE = 0;
+    const ACTION_INSERT = 1;
+    const ACTION_UPDATE = 2;
+    const ACTION_DELETE = 3;
+    const ACTION_BEGIN = 4;
+    const ACTION_COMMIT = 5;
+    const ACTION_ROLLBACK = 6;
     static public $bindType = array(
         'boolean' => \PDO::PARAM_BOOL,
         'integer' => \PDO::PARAM_INT,
@@ -17,6 +26,30 @@ class DBQuery
     public $trxWriteJobHistory = array();
     public $deadlockRetryTimes = 3;
     public $deadlockUsleepTime = 300000; //0.3s
+    
+    /**
+    * event trigger array
+    */
+    private $event = array(
+        SELF::TIMING_BEFORE => array(
+            SELF::ACTION_EXECUTE => array(),
+            SELF::ACTION_INSERT => array(),
+            SELF::ACTION_UPDATE => array(),
+            SELF::ACTION_DELETE => array(),
+            SELF::ACTION_BEGIN => array(),
+            SELF::ACTION_COMMIT => array(),
+            SELF::ACTION_ROLLBACK => array(),
+        ),
+        SELF::TIMING_AFTER => array(
+            SELF::ACTION_EXECUTE => array(),
+            SELF::ACTION_INSERT => array(),
+            SELF::ACTION_UPDATE => array(),
+            SELF::ACTION_DELETE => array(),
+            SELF::ACTION_BEGIN => array(),
+            SELF::ACTION_COMMIT => array(),
+            SELF::ACTION_ROLLBACK => array(),
+        ),
+    );
     
     /**
     * set following attr before DBQUERY::connect()
@@ -288,8 +321,8 @@ class DBQuery
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
-        $jobDoneCount = count($this->trxWriteJobHistory) - 1;
-        for ($i = 0 ; $i <= $jobDoneCount ; $i++) {
+        $jobDoneCount = count($this->trxWriteJobHistory);
+        for ($i = 0 ; $i < $jobDoneCount ; $i++) {
             $job = $this->trxWriteJobHistory[$i];
             $this->sth = $this->db[SELF::MASTER_RESOURCE_ID]->prepare($job['sql']);  
             foreach ($job['data'] as $k => $v) {
@@ -327,8 +360,10 @@ class DBQuery
         $columnsStr = '(' . $columnsStr . ')';
         $valuesBindStr = '(:' . implode(',:', array_keys($this->data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
-        array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $this->data));
         $rh = $this->execute($sql, $this->data, SELF::MASTER_RESOURCE_ID);
+        if ($rh->success()) {
+            array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $this->data));
+        }
         $rh->lastInsertId = $this->db[SELF::MASTER_RESOURCE_ID]->lastInsertId();
         $this->afterInsert($rh);
         return $rh;
@@ -371,8 +406,10 @@ class DBQuery
         $bindData = array_merge($paramsAry, $params);
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
-        array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $bindData));
         $rh = $this->execute($sql, $bindData, SELF::MASTER_RESOURCE_ID);
+        if ($rh->success()) {
+            array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $bindData));
+        }
         $this->afterUpdate($rh);
         return $rh;
     }
@@ -402,6 +439,9 @@ class DBQuery
         $this->beforeDelete();
         $sql = 'DELETE ' . $table . ' FROM ' . $table . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, $params, SELF::MASTER_RESOURCE_ID);
+        if ($rh->success()) {
+            array_push($this->trxWriteJobHistory, array('sql' => $sql, 'data' => $params));
+        }
         $this->afterDelete($rh);
         return $rh;
     }
@@ -410,9 +450,40 @@ class DBQuery
     {
         //do nothing;
     }
-
-    public function getData ()
+    
+    public function event ($timing, $action, $callback)
     {
-        return $this->data;
+        switch ($timing) {
+            case SELF::TIMING_BEFORE:
+                break;
+            case SELF::TIMING_AFTER:
+                break;
+            default:
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('DBQUERY Event Timing Error');
+        }
+        
+        switch ($action) {
+            case SELF::ACTION_EXECUTE:
+                break;
+            case SELF::ACTION_INSERT:
+                break;
+            case SELF::ACTION_UPDATE:
+                break;
+            case SELF::ACTION_DELETE:
+                break;
+            case SELF::ACTION_BEGIN:
+                break;
+            case SELF::ACTION_COMMIT:
+                break;
+            case SELF::ACTION_ROLLBACK :
+                break;
+            default:
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('DBQUERY Event Action Error');
+        }
+        
+        if (!is_callable($callback)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('DBQUERY Event Function Error');
+        }
+        $this->event[$timing][$action][] = $callback;
     }
 }
