@@ -1,4 +1,6 @@
 <?php 
+use Conpoz\Core\Lib\Db\DBQuery;
+
 $bag = new \Conpoz\Core\Lib\Util\Container();
 
 $bag->config = $config;
@@ -8,6 +10,12 @@ $bag->dbquery = function () use ($config) {
     $db->emulatePrepare = true;
     $db->setSqlErrorHandler(function ($rh) {
         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception(json_encode($rh->error()));
+    });
+    $db->event(DBQuery::TIMING_BEFORE, DBQuery::ACTION_INSERT, function () use ($db) {
+        $db->data['created'] = date('Y-m-d H:i:s');
+    });
+    $db->event(DBQuery::TIMING_BEFORE, DBQuery::ACTION_UPDATE, function () use ($db) {
+        $db->data['updated'] = date('Y-m-d H:i:s');
     });
     return $db;
 };

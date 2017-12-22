@@ -6,6 +6,15 @@ class DBQuery
     const AUTO_RESOURCE_ID = -1;
     const MASTER_RESOURCE_ID = 0;
     const SLAVE_RESOURCE_ID = 1;
+    const TIMING_BEFORE = 0;
+    const TIMING_AFTER = 1;
+    const ACTION_BEGIN = 0;
+    const ACTION_COMMIT = 1;
+    const ACTION_ROLLBACK = 2;
+    const ACTION_EXECUTE = 3;
+    const ACTION_INSERT = 4;
+    const ACTION_UPDATE = 5;
+    const ACTION_DELETE = 6;
     static public $bindType = array(
         'boolean' => \PDO::PARAM_BOOL,
         'integer' => \PDO::PARAM_INT,
@@ -31,8 +40,9 @@ class DBQuery
     private $username = array();
     private $password = array();
     private $sqlErrorHandler = null;
-    protected $table;
-    protected $data;
+    protected $event = array(SELF::TIMING_BEFORE => array(), SELF::TIMING_AFTER => array());
+    public $table;
+    public $data;
 
     public function __construct($dsnSet) 
     {
@@ -128,6 +138,16 @@ class DBQuery
     {
         return $this->errorInfo;
     }
+    
+    protected function beforeBeign()
+    {
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN] as $callback) {
+            $callback->__invoke();
+        }
+    }
 
     public function begin() 
     {
@@ -135,13 +155,30 @@ class DBQuery
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
-        $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
-        return $this;
+        $this->beforeBeign();
+        $return = $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
+        $this->afterBeign($return);
+        return $return;
+    }
+    
+    protected function afterBeign($success)
+    {
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN] as $callback) {
+            $callback->__invoke($success);
+        }
     }
 
-    protected function beforeCommit()
+    protected function beforeCommit($success)
     {
-        //do nothign
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_COMMIT])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_COMMIT] as $callback) {
+            $callback->__invoke();
+        }
     }
 
     public function commit() 
@@ -157,12 +194,22 @@ class DBQuery
 
     protected function afterCommit($success)
     {
-        //do nothign
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_COMMIT])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_COMMIT] as $callback) {
+            $callback->__invoke($success);
+        }
     }
 
     protected function beforeRollback()
     {
-        //do nothign
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_ROLLBACK])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_ROLLBACK] as $callback) {
+            $callback->__invoke();
+        }
     }
 
     public function rollback() 
@@ -178,9 +225,24 @@ class DBQuery
 
     protected function afterRollback($success)
     {
-        //do nothign
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_ROLLBACK])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_ROLLBACK] as $callback) {
+            $callback->__invoke($success);
+        }
     }
-
+    
+    protected function beforeExecute()
+    {
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_EXECUTE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_EXECUTE] as $callback) {
+            $callback->__invoke();
+        }
+    }
+    
     public function execute($sql, array $params = array(), $dbEnv = SELF::AUTO_RESOURCE_ID) 
     {
         if (empty($sql)) {
@@ -206,10 +268,8 @@ class DBQuery
                     } else {
                         //'IN SHARE MODE', 'FOR UPDATE'
                         if (stripos(trim($sql), 'SELECT') === 0 && !preg_match('/\s+lock\s+in\s+share\s+mode/i', $sql) && !preg_match('/\s+for\s+update/i', $sql)) {
-                            var_dump('slave');
                             $resourceIndex = SELF::SLAVE_RESOURCE_ID;
                         } else {
-                            var_dump('master');
                             $resourceIndex = SELF::MASTER_RESOURCE_ID;
                             $this->focusMaster = true;
                         }
@@ -238,27 +298,32 @@ class DBQuery
         /**
         * execute and handle deadlock, and redo for setting times
         **/
-        $retry = 0;
-        while (true) {
-            try {
-                $success = $this->sth->execute();
-                /**
-                * executed and no exception;
-                **/
-                break;
-            } catch (\PDOException $e) {
-                if ($retry <= $this->deadlockRetryTimes) {
-                    throw $e;
-                }
-                /**
-                * $e->errorInfo[0]==40001 (ISO/ANSI) Serialization failure, e.g. timeout or deadlock;
-                * $e->errorInfo[1]==1213 (MySQL SQLSTATE) ER_LOCK_DEADLOCK
-                */
-                if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
-                    $retry ++;
-                    usleep($this->deadlockUsleepTime);
-                } else {
-                    throw $e;
+        $this->beforeExecute();
+        if ($this->db[$resourceIndex]->inTransaction()) {
+            $success = $this->sth->execute();
+        } else {
+            $retry = 0;
+            while (true) {
+                try {
+                    $success = $this->sth->execute();
+                    /**
+                    * executed and no exception;
+                    **/
+                    break;
+                } catch (\PDOException $e) {
+                    if ($retry <= $this->deadlockRetryTimes) {
+                        throw $e;
+                    }
+                    /**
+                    * $e->errorInfo[0]==40001 (ISO/ANSI) Serialization failure, e.g. timeout or deadlock;
+                    * $e->errorInfo[1]==1213 (MySQL SQLSTATE) ER_LOCK_DEADLOCK
+                    */
+                    if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
+                        $retry ++;
+                        usleep($this->deadlockUsleepTime);
+                    } else {
+                        throw $e;
+                    }
                 }
             }
         }
@@ -272,12 +337,28 @@ class DBQuery
         if (!$success && !is_null($this->sqlErrorHandler)) {
             $this->sqlErrorHandler->__invoke($rh);
         }
+        $this->afterExecute($rh);
         return $rh;
+    }
+    
+    protected function afterExecute($rh)
+    {
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_EXECUTE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_EXECUTE] as $callback) {
+            $callback->__invoke($rh);
+        }
     }
 
     protected function beforeInsert() 
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_INSERT])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_INSERT] as $callback) {
+            $callback->__invoke();
+        }
     }
 
     public function insert($table, array $data = array()) 
@@ -303,12 +384,22 @@ class DBQuery
 
     protected function afterInsert ($rh)
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_INSERT])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_INSERT] as $callback) {
+            $callback->__invoke($rh);
+        }
     }
 
     protected function beforeUpdate() 
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_UPDATE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_UPDATE] as $callback) {
+            $callback->__invoke();
+        }
     }
 
     public function update($table, array $data, $conditions = null, array $params = array()) 
@@ -344,12 +435,22 @@ class DBQuery
 
     protected function afterUpdate($rh) 
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_UPDATE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_UPDATE] as $callback) {
+            $callback->__invoke($rh);
+        }
     }
 
     protected function beforeDelete ()
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_DELETE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_DELETE] as $callback) {
+            $callback->__invoke();
+        }
     }
 
     public function delete($table, $conditions = null, array $params = array()) 
@@ -373,11 +474,16 @@ class DBQuery
 
     protected function afterDelete ($rh)
     {
-        //do nothing;
+        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_DELETE])) {
+            return;
+        }
+        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_DELETE] as $callback) {
+            $callback->__invoke($rh);
+        }
     }
-
-    public function getData ()
+    
+    public function event ($timing, $action, $callback)
     {
-        return $this->data;
+        $this->event[$timing][$action][] = $callback;
     }
 }

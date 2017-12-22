@@ -14,11 +14,14 @@ class View
     public function addView($viewPath) 
     {
         array_push($this->view, $viewPath);
+        return $this;
     }
 
-    public function getView()
+    public function getView($viewPath = null)
     {
-        $viewPath = array_shift($this->view);
+        if (is_null($viewPath)) {
+            $viewPath = array_shift($this->view);
+        }
         $viewPath =  $this->viewRoot . $viewPath . '.php';
         if (!($realViewPath = realpath($viewPath))) {
             throw new \Exception('Not Found View ' . $viewPath);
