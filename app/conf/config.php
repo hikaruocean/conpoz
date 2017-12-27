@@ -7,6 +7,7 @@ $config->route = array(
     '404Action' => 'http404',
 );
 $config->autoloadNamespace = array(
+    'Conpoz\\App\\' => APP_PATH . '/',
     'Conpoz\\App\\Controller\\' => APP_PATH . '/controller/',
     'Conpoz\\App\\Task\\' => APP_PATH . '/task/',
     'Conpoz\\App\\Model\\' => APP_PATH . '/model/',
@@ -51,5 +52,27 @@ $config->ACL = array(
         array('Index', '*'),
         array('Error', '*'),
     ),
+);
+$config->middlewareGroup = array(
+    'Cors',
+    'M1',
+    'M2',
+);
+$config->middlewareGroup2 = array(
+    'Cors',
+    'M1',
+    'M4',
+    'M2',
+);
+$config->middlewareBind = array(
+    '*' => 'M4',
+    'Index' => array(
+        '*' => $config->middlewareGroup,
+        'update' => 'M3',
+    ),
+    'Member' => array(
+        '*' => $config->middlewareGroup2,
+        'needLogin' => 'M1',
+    )
 );
 return $config;

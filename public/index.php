@@ -8,6 +8,7 @@ try {
     $config = require(APP_PATH . '/conf/config.php');
     require(APP_PATH . '/conf/envInit.php');
     require(CORE_PATH . '/include/autoLoader.php');
+    require(CORE_PATH . '/include/setErrorHandler.php');
     require(CONPOZ_PATH . '/vendor/autoload.php');
     $bag = require(APP_PATH . '/conf/service.php');
     $app = new \Conpoz\Core\Lib\Mvc\App($bag);

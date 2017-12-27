@@ -3,11 +3,26 @@ namespace Conpoz\App\Controller;
 
 abstract class BaseController
 {
-    public function init($bag)
+    public function init ($bag)
     {
         /**
-         * ACL
-         */
+        * ACL
+        */
+        // if (false === $this->acl()) {
+        //     return false;
+        // }
+        /**
+        * MIDDLEWARE
+        */
+        if (false === $this->middleware()) {
+            return false;
+        }
+        return true;
+    }
+    
+    public function acl ()
+    {
+        $bag = $this->bag;
         if (!$bag->sess->user_id || !$bag->sess->user_role) {
             $roles = ['guest'];
         } else {
@@ -37,6 +52,55 @@ abstract class BaseController
             $this->app->dispatch('Index', 'index');
             return false;
         }
+        return true;
+    }
+    
+    public function middleware ()
+    {
+        $bag = $this->bag;
+        $preparedMiddlewareAry = array();
+        if (isset($bag->config->middlewareBind['*'])) {
+            $middlewareArray = (array) $bag->config->middlewareBind['*'];
+            foreach ($middlewareArray as $middlewareName) {
+                $middlewareFullName = '\\Conpoz\App\Middleware\\' . $middlewareName;
+                if (!in_array($middlewareFullName, $preparedMiddlewareAry)) {
+                    $preparedMiddlewareAry[] = $middlewareFullName;
+                }
+            }
+        }
+        
+        if (isset($bag->config->middlewareBind[$this->app->controllerName]['*'])) {
+            $middlewareArray = (array) $bag->config->middlewareBind[$this->app->controllerName]['*'];
+            foreach ($middlewareArray as $middlewareName) {
+                $middlewareFullName = '\\Conpoz\App\Middleware\\' . $middlewareName;
+                $key = array_search($middlewareFullName, $preparedMiddlewareAry);
+                if (false === $key) {
+                    $preparedMiddlewareAry[] = $middlewareFullName;
+                } else {
+                    unset($preparedMiddlewareAry[$key]);
+                    $preparedMiddlewareAry[] = $middlewareFullName;
+                }
+            }
+        }
+        
+        if (isset($bag->config->middlewareBind[$this->app->controllerName][$this->app->actionName])) {
+            $middlewareArray = (array) $bag->config->middlewareBind[$this->app->controllerName][$this->app->actionName];
+            foreach ($middlewareArray as $middlewareName) {
+                $middlewareFullName = '\\Conpoz\App\Middleware\\' . $middlewareName;
+                $key = array_search($middlewareFullName, $preparedMiddlewareAry);
+                if (false === $key) {
+                    $preparedMiddlewareAry[] = $middlewareFullName;
+                } else {
+                    unset($preparedMiddlewareAry[$key]);
+                    $preparedMiddlewareAry[] = $middlewareFullName;
+                }
+            }
+        }
+        
+        foreach ($preparedMiddlewareAry as $middlewareFullName) {
+            $middlewareFullName::run($this);
+        }
+        
         return true;
     }
 }
