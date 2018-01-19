@@ -12,6 +12,7 @@ $config->autoloadNamespace = array(
     'Conpoz\\App\\Task\\' => APP_PATH . '/task/',
     'Conpoz\\App\\Model\\' => APP_PATH . '/model/',
     'Conpoz\\App\\Lib\\' => APP_PATH . '/lib/',
+    'Conpoz\\App\\Middleware\\' => APP_PATH . '/middleware/',
     'Conpoz\\Core\\Lib\\' => CORE_PATH . '/lib/',
 );
 $config->db = array(

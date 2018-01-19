@@ -54,4 +54,4 @@ $closure = function ($db, $config) {
 
     return $acl;
 };
-return $closure($this->bag->dbquery, $this->bag->config);
+return $closure($controller->bag->dbquery, $controller->bag->config);
