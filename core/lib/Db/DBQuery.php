@@ -46,12 +46,17 @@ class DBQuery
 
     public function __construct($dsnSet) 
     {
-        // set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
-        //     if (strpos($errstr, 'PDO::__construct(): MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
-        //         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006);
-        //     }
-        //     return false;
-        // }, E_WARNING);
+        $tmpThis = $this;
+        set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) use ($tmpThis) {
+            if (strpos($errstr, 'MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
+                foreach ($tmpThis->success as &$v) {
+                    $v = 0;
+                }
+                unset($v);
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006);
+            }
+            return false;
+        }, E_WARNING);
 
         register_shutdown_function(function(\Conpoz\Core\Lib\Db\DBQuery $obj) {
             if($obj->success[SELF::MASTER_RESOURCE_ID] && $obj->db[SELF::MASTER_RESOURCE_ID]->inTransaction()) {
