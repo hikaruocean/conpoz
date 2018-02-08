@@ -49,10 +49,17 @@ class DBQuery
         $tmpThis = $this;
         set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) use ($tmpThis) {
             if (strpos($errstr, 'MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
-                foreach ($tmpThis->success as &$v) {
-                    $v = 0;
-                }
-                unset($v);
+                /**
+                 * specific resource set reconnect
+                 */
+                $tmpThis->success[$errcontext['dbEnv']] = 0;
+                /**
+                 * all resource set reconnect
+                 */
+                // foreach ($tmpThis->success as &$v) {
+                //     $v = 0;
+                // }
+                // unset($v);
                 throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006);
             }
             return false;
@@ -264,7 +271,7 @@ class DBQuery
                     $this->focusMaster = true;
                     break;
                 case SELF::SLAVE_RESOURCE_ID:
-                    $resourceIndex = SLAVE_RESOURCE_ID;
+                    $resourceIndex = SELF::SLAVE_RESOURCE_ID;
                     break;
                 default: 
                 // case SELF::AUTO_RESOURCE_ID:
