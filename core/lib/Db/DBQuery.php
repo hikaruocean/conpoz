@@ -46,21 +46,9 @@ class DBQuery
 
     public function __construct($dsnSet) 
     {
-        $tmpThis = $this;
-        set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) use ($tmpThis) {
+        set_error_handler(function($errno, $errstr, $errfile, $errline) {
             if (strpos($errstr, 'MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
-                /**
-                 * specific resource set reconnect
-                 */
-                $tmpThis->success[$errcontext['dbEnv']] = 0;
-                /**
-                 * all resource set reconnect
-                 */
-                // foreach ($tmpThis->success as &$v) {
-                //     $v = 0;
-                // }
-                // unset($v);
-                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006);
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006, $errfile, $errline);
             }
             return false;
         }, E_WARNING);
@@ -107,30 +95,44 @@ class DBQuery
 
     public function connect ($dbEnv = SELF::MASTER_RESOURCE_ID)
     {
-        try {
-            switch ($dbEnv) {
-                case SELF::MASTER_RESOURCE_ID:
-                    $this->db[SELF::MASTER_RESOURCE_ID] = new \PDO($this->dsnSet[0], $this->username[0], $this->password[0], array(
-                        \PDO::ATTR_PERSISTENT => $this->persistent
-                    ));
-                    $this->db[SELF::MASTER_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
+        $retry = 0;
+        $reconnectLimitTimes = 1;
+        while (true) {
+            try {
+                switch ($dbEnv) {
+                    case SELF::MASTER_RESOURCE_ID:
+                        $this->db[SELF::MASTER_RESOURCE_ID] = new \PDO($this->dsnSet[0], $this->username[0], $this->password[0], array(
+                            \PDO::ATTR_PERSISTENT => $this->persistent
+                        ));
+                        $this->db[SELF::MASTER_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
+                        break;
+                    case SELF::SLAVE_RESOURCE_ID:
+                        if ($this->masterDisableLoadbalance) {
+                            $slaveIndex = mt_rand(1, count($this->dsnSet) - 1);
+                        } else {
+                            $slaveIndex = mt_rand(0, count($this->dsnSet) - 1);
+                        }
+                        $this->db[SELF::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
+                            \PDO::ATTR_PERSISTENT => $this->persistent
+                        ));
+                        $this->db[SELF::SLAVE_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
+                        break;
+                }
+                break;
+            } catch (\PDOException $e) {
+                $this->errorInfo = $e->getMessage();
+                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception($this->errorInfo);
+                return false;
+            } catch (\Conpoz\Core\Lib\Db\DBQuery\Exception $e) {
+                if ($e->getCode() != 2006) {
                     break;
-                case SELF::SLAVE_RESOURCE_ID:
-                    if ($this->masterDisableLoadbalance) {
-                        $slaveIndex = mt_rand(1, count($this->dsnSet) - 1);
-                    } else {
-                        $slaveIndex = mt_rand(0, count($this->dsnSet) - 1);
-                    }
-                    $this->db[SELF::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
-                        \PDO::ATTR_PERSISTENT => $this->persistent
-                    ));
-                    $this->db[SELF::SLAVE_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
-                    break;
+                }
+                if ($retry < $reconnectLimitTimes) {
+                    $retry++;
+                } else {
+                    throw $e;
+                }
             }
-        } catch (\PDOException $e) {
-            $this->errorInfo = $e->getMessage();
-            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception($this->errorInfo);
-            return false;
         }
         $this->success[$dbEnv] = true;
         return true;
@@ -168,7 +170,25 @@ class DBQuery
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
         $this->beforeBeign();
-        $return = $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
+        $retry = 0;
+        $reconnectLimitTimes = 1;
+        while (true) {
+            try {
+                $return = $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
+                break;
+            } catch (\Conpoz\Core\Lib\Db\DBQuery\Exception $e) {
+                echo $e->getCode();
+                if ($e->getCode() != 2006) {
+                    throw $e;
+                }
+                if ($retry < $reconnectLimitTimes) {
+                    $retry ++;
+                    $this->connect(SELF::MASTER_RESOURCE_ID);
+                } else {
+                    throw $e;
+                }
+            }
+        }
         $this->afterBeign($return);
         return $return;
     }
@@ -183,7 +203,7 @@ class DBQuery
         }
     }
 
-    protected function beforeCommit($success)
+    protected function beforeCommit()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_COMMIT])) {
             return;
@@ -293,8 +313,7 @@ class DBQuery
         if (!$this->success[$resourceIndex]) {
             $this->connect($resourceIndex);
         } 
- 
-        $this->sth = $this->db[$resourceIndex]->prepare($sql);  
+        $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
         foreach ($params as $k => $v) {
             $bindType = SELF::$bindType['others'];
             if (isset(SELF::$bindType[gettype($v)])) {
@@ -315,6 +334,7 @@ class DBQuery
             $success = $this->sth->execute();
         } else {
             $retry = 0;
+            $reconnectLimitTimes = 1;
             while (true) {
                 try {
                     $success = $this->sth->execute();
@@ -323,7 +343,7 @@ class DBQuery
                     **/
                     break;
                 } catch (\PDOException $e) {
-                    if ($retry <= $this->deadlockRetryTimes) {
+                    if ($retry > $this->deadlockRetryTimes) {
                         throw $e;
                     }
                     /**
@@ -333,6 +353,17 @@ class DBQuery
                     if ($e->errorInfo[0]==40001 && $exc->errorInfo[1]==1213) {
                         $retry ++;
                         usleep($this->deadlockUsleepTime);
+                    } else {
+                        throw $e;
+                    }
+                } catch (\Conpoz\Core\Lib\Db\DBQuery\Exception $e) {
+                    if ($e->getCode() != 2006) {
+                        throw $e;
+                    }
+                    if ($retry < $reconnectLimitTimes) {
+                        $this->connect($resourceIndex);
+                        $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
+                        $retry ++;
                     } else {
                         throw $e;
                     }
@@ -351,6 +382,23 @@ class DBQuery
         }
         $this->afterExecute($rh);
         return $rh;
+    }
+    
+    protected function sthProcess ($resourceIndex, $sql, $params)
+    {
+        $sth = $this->db[$resourceIndex]->prepare($sql);
+        foreach ($params as $k => $v) {
+            $bindType = SELF::$bindType['others'];
+            if (isset(SELF::$bindType[gettype($v)])) {
+                $bindType = SELF::$bindType[gettype($v)];
+            }
+            if (is_int($k)) {
+                $sth->bindValue($k + 1, $v, $bindType);
+            } else {
+                $sth->bindValue(':' . $k, $v, $bindType);
+            }
+        }
+        return $sth;
     }
     
     protected function afterExecute($rh)
