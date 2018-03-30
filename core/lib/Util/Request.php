@@ -3,10 +3,12 @@ namespace Conpoz\Core\Lib\Util;
 
 class Request
 {
+    public $uri = null;
+    
     public function __construct()
     {
-        $uri = isset($_GET['_url']) ? rtrim($_GET['_url'], '/') : '';
-        $uriAry = explode('/', $uri);
+        $this->uri = isset($_GET['_url']) ? rtrim($_GET['_url'], '/') : '';
+        $uriAry = explode('/', $this->uri);
         array_shift($uriAry);
         foreach ($uriAry as &$param) {
             $paramAry = explode(':', $param, 2);
@@ -114,5 +116,10 @@ class Request
             }
         }
         return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+    }
+    
+    public function getUri ()
+    {
+        return $this->uri;
     }
 }
