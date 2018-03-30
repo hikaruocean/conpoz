@@ -9,7 +9,6 @@ class Model
     public function __construct($app)
     {
         $this->app = $app;
-        $this->bag = $app->bag;
     }
 
     public function __get($modelName) 
@@ -18,7 +17,8 @@ class Model
             $modelClass = '\\Conpoz\\App\\Model\\' . $modelName;
             $this->model[$modelName] = new $modelClass();
             $this->model[$modelName]->app = $this->app;
-            $this->model[$modelName]->bag = $this->bag;
+            $this->model[$modelName]->bag = $this->app->bag;
+            $this->model[$modelName]->model = $this->app->model;
         }
         return $this->model[$modelName];
     }
@@ -29,7 +29,8 @@ class Model
             $modelClass = '\\Conpoz\\App\\Model\\' . $modelName;
             $this->model[$modelName] = new $modelClass($data);
             $this->model[$modelName]->app = $this->app;
-            $this->model[$modelName]->bag = $this->bag;
+            $this->model[$modelName]->bag = $this->app->bag;
+            $this->model[$modelName]->model = $this->app->model;
         }
         return $this->model[$modelName];
     }
