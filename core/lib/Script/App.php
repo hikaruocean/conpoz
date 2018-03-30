@@ -38,7 +38,7 @@ class App
         } else {
             $taskClass = '\\Conpoz\\App\\Task\\' . $task;
             $taskObject = new $taskClass();
-            if (!method_exists($taskObject, $action . 'Action')) {
+            if (!is_callable(array($taskObject, $action . 'Action'))) {
                 throw new \Exception('ACTION NOT FOUND' . PHP_EOL);
             }
         }
@@ -50,9 +50,10 @@ class App
         $this->taskName = $task;
         $this->actionName = $action;
         $this->task = $taskObject;
+        $this->model = new \Conpoz\Core\Lib\Mvc\Model($this);
         $taskObject->app = $this;
         $taskObject->bag = $this->bag;
-        $taskObject->model = new \Conpoz\Core\Lib\Mvc\Model($this);
+        $taskObject->model = $this->model;
         if (method_exists($taskObject, 'init')) {
             if ($taskObject->init($this->bag) === false) {
                 return false;
