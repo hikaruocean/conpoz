@@ -61,9 +61,10 @@ class App
         $this->controllerName = $controller;
         $this->actionName = $action;
         $this->controller = $controllerObject;
+        $this->model = new \Conpoz\Core\Lib\Mvc\Model($this);
         $controllerObject->app = $this;
         $controllerObject->bag = $this->bag;
-        $controllerObject->model = new \Conpoz\Core\Lib\Mvc\Model($this);
+        $controllerObject->model = $this->model;
         $controllerObject->view = new \Conpoz\Core\Lib\Mvc\View();
         if (method_exists($controllerObject, 'init')) {
             if ($controllerObject->init($this->bag) === false) {
