@@ -46,7 +46,7 @@ class App
         } else {
             $controllerClass = '\\Conpoz\\App\\Controller\\' . $controller;
             $controllerObject = new $controllerClass();
-            if (!method_exists($controllerObject, $action . 'Action')) {
+            if (!is_callable(array($controllerObject, $action . 'Action'))) {
                 $controller = $this->config->route['404Controller'];
                 $action = $this->config->route['404Action'];
                 $controllerClass = '\\Conpoz\\App\\Controller\\' . $controller;
