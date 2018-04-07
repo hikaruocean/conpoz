@@ -12,12 +12,14 @@ class Worker
                 'detectLiveTimeSec' => 180,
             );
     public $jobObj = null;
+    public $dbquery = null;
     
-    public function __construct ($jobObj = null, $params = array())
+    public function __construct ($dbquery = null, $jobObj = null, $params = array())
     {
         $this->params = array_merge($this->params, $params);
         $this->params['usleepTime'] = $this->params['usleepBaseTime'];
         $this->jobObj = $jobObj;
+        $this->dbquery = $dbquery;
     }
     
     public function setJobObject ($jobObj = null)
@@ -32,10 +34,19 @@ class Worker
         return $this;
     }
     
+    public function setDBQuery ($dbquery)
+    {
+        $this->dbquery = $dbquery;
+        return $this;
+    }
+    
     public function run ()
     {
         if (!is_object($this->jobObj)) {
             throw new \Exception("setJobObject is required");
+        }
+        if (!is_object($this->dbquery)) {
+            throw new \Exception("setDBQuery is required");
         }
         for ($i = 0 ; $i < $this->params['childProcessQuantity'] ; $i++) {
             $tempSockAry = array();
@@ -111,7 +122,7 @@ class Worker
     {
         try {
             $pid = getmypid();
-            $dbquery = \Conpoz\Core\Lib\Util\Container::getService('dbquery');
+            $dbquery = $this->dbquery;
             while (1) {
                 $sql = "SELECT job_queue_id, name, params FROM job_queue WHERE status = 0 ORDER BY job_queue_id ASC LIMIT 1 FOR UPDATE";
                 $dbquery->begin();
