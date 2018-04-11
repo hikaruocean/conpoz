@@ -141,12 +141,11 @@ class Worker
                         $this->params['usleepTime'] /= 2;
                         $this->params['usleepTime'] = $this->params['usleepTime'] < $this->params['usleepMinTime'] ? $this->params['usleepMinTime'] : $this->params['usleepTime'];
                     }
-                    $paramsObj = json_decode($jobObj->params);
                     try {
                         if (!is_callable(array($this->jobObj, $jobObj->name))) {
                             throw new \Exception('job name not found');
                         }
-                        $this->jobObj->{$jobObj->name}($paramsObj);
+                        $this->jobObj->{$jobObj->name}($jobObj->params);
                         $dbquery->update('job_queue', array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         echo date('Y-m-d H:i:s') . ' [' . $jobObj->name . '@' . $pid . '] Success. ' . PHP_EOL;
                     } catch (\Exception $e) {
