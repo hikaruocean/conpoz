@@ -37,7 +37,11 @@ class App
 
     public function dispatch ($controller, $action)
     {
-        $controller = ucfirst($controller);
+        $crontrollerArray = explode('-', $controller);
+        $crontrollerArray = array_map(function ($v) {
+            return ucfirst($v);
+        }, $crontrollerArray);
+        $controller = implode('\\', $crontrollerArray);
         if (!class_exists('Conpoz\\App\\Controller\\' . $controller)) {
             $controller = $this->config->route['404Controller'];
             $action = $this->config->route['404Action'];
