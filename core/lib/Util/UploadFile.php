@@ -9,7 +9,7 @@ class UploadFile
     public $tmpName;
     public $error;
     public $otherInfo = array();
-    public function __construct(&$fileInfo = array()) 
+    public function __construct($fileInfo = array()) 
     {
         $this->name = $fileInfo['name'];
         $this->size = $fileInfo['size'];
