@@ -36,4 +36,35 @@ class Tool
     public static function html($string) {
         return htmlspecialchars($string, ENT_QUOTES);
     }
+    
+    public static function buildQuery ($uri, $newGetData = array()) 
+    {
+        $getData = $_GET;
+        $returnQueryStr = '';
+        $uriInfoAry = explode('/', ltrim($uri, '/'));
+        $noKeyParamsCount = 0;
+        foreach ($uriInfoAry as $param) {
+            $dataAry = explode(':', $param, 2);
+            if (isset($dataAry[1])) {
+                if (isset($newGetData[$dataAry[0]])) {
+                    $value = $newGetData[$dataAry[0]];
+                    unset($newGetData[$dataAry[0]]);
+                } else {
+                    $value = $dataAry[1];
+                }
+                unset($getData[$dataAry[0]]);
+                $returnQueryStr .= '/' . $dataAry[0] . ':' . urlencode($value);
+            } else {
+                $returnQueryStr .= '/' . $dataAry[0];
+                unset($getData[$noKeyParamsCount ++]);
+            }
+        }
+        foreach ($getData as $k => $v) {
+            $returnQueryStr .= '/' . $k . ':' . urlencode($v);
+        }
+        foreach ($newGetData as $k => $v) {
+            $returnQueryStr .= '/' . $k . ':' . urlencode($v);
+        }
+        return $returnQueryStr;
+    }
 }
