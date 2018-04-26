@@ -30,8 +30,12 @@ class Request
             return isset($_POST[$name]) ? $_POST[$name] : $defaultValue;
         }
         $returnAry = array();
-        foreach($name as $v) {
-            $returnAry[$v] = isset($_POST[$v]) ? $_POST[$v] : $defaultValue;
+        foreach($name as $k => $v) {
+            if (is_int($k)) {
+                $returnAry[$v] = isset($_POST[$v]) ? $_POST[$v] : $defaultValue;
+            } else {
+                $returnAry[$k] = isset($_POST[$k]) ? $_POST[$k] : $v;
+            }
         }
         return $returnAry;
     }
@@ -42,8 +46,12 @@ class Request
             return isset($_GET[$name]) ? $_GET[$name] : $defaultValue;
         }
         $returnAry = array();
-        foreach($name as $v) {
-            $returnAry[$v] = isset($_GET[$v]) ? $_GET[$v] : $defaultValue;
+        foreach($name as $k => $v) {
+            if (is_int($k)) {
+                $returnAry[$v] = isset($_GET[$v]) ? $_GET[$v] : $defaultValue;
+            } else {
+                $returnAry[$k] = isset($_GET[$k]) ? $_GET[$k] : $v;
+            }
         }
         return $returnAry;
     }
