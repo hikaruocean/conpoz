@@ -153,7 +153,7 @@ class DBQuery
         return $this->errorInfo;
     }
     
-    protected function beforeBeign()
+    protected function beforeBegin()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN])) {
             return;
@@ -169,7 +169,7 @@ class DBQuery
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
         }
-        $this->beforeBeign();
+        $this->beforeBegin();
         $retry = 0;
         $reconnectLimitTimes = 1;
         while (true) {
@@ -189,11 +189,11 @@ class DBQuery
                 }
             }
         }
-        $this->afterBeign($return);
+        $this->afterBegin($return);
         return $return;
     }
     
-    protected function afterBeign($success)
+    protected function afterBegin($success)
     {
         if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN])) {
             return;
