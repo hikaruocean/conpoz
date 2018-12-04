@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Util;
 
 class Worker
@@ -13,7 +13,7 @@ class Worker
             );
     public $jobObj = null;
     public $dbquery = null;
-    
+
     public function __construct ($dbquery = null, $jobObj = null, $params = array())
     {
         $this->params = array_merge($this->params, $params);
@@ -21,27 +21,45 @@ class Worker
         $this->jobObj = $jobObj;
         $this->dbquery = $dbquery;
     }
-    
+
     public function setJobObject ($jobObj = null)
     {
         $this->jobObj = $jobObj;
         return $this;
     }
-    
+
     public function setParams ($params)
     {
         $this->params = array_merge($this->params, $params);
         return $this;
     }
-    
+
     public function setDBQuery ($dbquery)
     {
         $this->dbquery = $dbquery;
         return $this;
     }
-    
+
     public function run ()
     {
+        $status = null;
+        $pid = pcntl_fork();
+        if ($pid === -1) {
+            throw new \Exception("could not fork process");
+        } else if ($pid > 0) {
+            pcntl_wait($status);
+            exit;
+        }
+        unset($status);
+
+        $pid = pcntl_fork();
+        if ($pid === -1) {
+            throw new \Exception("could not fork process");
+        } else if ($pid > 0) {
+            exit;
+        }
+        posix_setsid();
+
         if (!is_object($this->jobObj)) {
             throw new \Exception("setJobObject is required");
         }
@@ -79,7 +97,7 @@ class Worker
             $this->managerLoop();
         }
     }
-    
+
     private function managerLoop ()
     {
         while (1) {
@@ -88,7 +106,7 @@ class Worker
             $except = NULL;
             $changeSockNums = socket_select($changedSockAry, $write, $except, 1);
             if ($changeSockNums > 0) {
-                
+
                 foreach ($changedSockAry as $socket) {
                     $buf = socket_read($socket,256);
                     $index = array_search($socket, $this->childSockAry);
@@ -101,7 +119,7 @@ class Worker
                     }
                     else {
                         $this->childLastLive[$index] = time();
-                        echo 'PID ' . $index . ' Says : ' . $buf . PHP_EOL;
+                        // echo 'PID ' . $index . ' Says : ' . $buf . PHP_EOL;
                         $okStr = 'ok';
                         $this->speak($socket, $okStr);
                     }
@@ -117,7 +135,7 @@ class Worker
             }
         }
     }
-    
+
     private function childLoop ()
     {
         try {
@@ -160,14 +178,14 @@ class Worker
             echo $e->getMessage() . PHP_EOL;
         }
     }
-    
+
     public function speakThenListen ($sock, $notifyStr)
     {
         $this->speak($sock, $notifyStr);
         $buf = socket_read($sock, 256);
         unset($buf);
     }
-    
+
     public function speak ($sock, $notifyStr)
     {
         if (socket_write($sock, $notifyStr, strlen($notifyStr)) === false) {
