@@ -26,7 +26,7 @@ spl_autoload_register(function ($class) use ($config) {
                 foreach ($prefixDirsPsr4[$prefix] as $dir) {
                     if (file_exists($file = $dir . DIRECTORY_SEPARATOR . substr($logicalPathPsr4, $length))) {
                         require $file;
-                        break 2;
+                        return;
                     }
                 }
             }
@@ -37,7 +37,7 @@ spl_autoload_register(function ($class) use ($config) {
     foreach ($fallbackDirsPsr4 as $dir) {
         if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr4)) {
             require $file;
-            break;
+            return;
         }
     }
 }, true, true);
