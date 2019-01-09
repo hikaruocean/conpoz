@@ -13,6 +13,7 @@ class Worker
             );
     public $jobObj = null;
     public $dbquery = null;
+    public $queueName = 'job_queue';
 
     public function __construct ($dbquery = null, $jobObj = null, $params = array())
     {
@@ -42,24 +43,6 @@ class Worker
 
     public function run ()
     {
-        $status = null;
-        $pid = pcntl_fork();
-        if ($pid === -1) {
-            throw new \Exception("could not fork process");
-        } else if ($pid > 0) {
-            pcntl_wait($status);
-            exit;
-        }
-        unset($status);
-
-        $pid = pcntl_fork();
-        if ($pid === -1) {
-            throw new \Exception("could not fork process");
-        } else if ($pid > 0) {
-            exit;
-        }
-        posix_setsid();
-
         if (!is_object($this->jobObj)) {
             throw new \Exception("setJobObject is required");
         }
@@ -119,7 +102,7 @@ class Worker
                     }
                     else {
                         $this->childLastLive[$index] = time();
-                        // echo 'PID ' . $index . ' Says : ' . $buf . PHP_EOL;
+                        echo 'PID ' . $index . ' Says : ' . $buf . PHP_EOL;
                         $okStr = 'ok';
                         $this->speak($socket, $okStr);
                     }
@@ -142,7 +125,7 @@ class Worker
             $pid = getmypid();
             $dbquery = $this->dbquery;
             while (1) {
-                $sql = "SELECT job_queue_id, name, params FROM job_queue WHERE status = 0 ORDER BY job_queue_id ASC LIMIT 1 FOR UPDATE";
+                $sql = "SELECT job_queue_id, name, params FROM " . $this->queueName . " WHERE status = 0 ORDER BY job_queue_id ASC LIMIT 1 FOR UPDATE";
                 $dbquery->begin();
                 $rh = $dbquery->execute($sql);
                 $jobObj = $rh->fetch();
@@ -151,7 +134,7 @@ class Worker
                     $this->params['usleepTime'] *= 2;
                     $this->params['usleepTime'] = $this->params['usleepTime'] > $this->params['usleepMaxTime'] ? $this->params['usleepMaxTime'] : $this->params['usleepTime'];
                 } else {
-                    $dbquery->update('job_queue', array('status' => 1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
+                    $dbquery->update($this->queueName, array('status' => 1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                     $dbquery->commit();
                     if ($this->params['usleepTime'] > $this->params['usleepBaseTime']) {
                         $this->params['usleepTime'] = $this->params['usleepBaseTime'];
@@ -164,10 +147,10 @@ class Worker
                             throw new \Exception('job name not found');
                         }
                         $this->jobObj->{$jobObj->name}($jobObj->params);
-                        $dbquery->update('job_queue', array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
+                        $dbquery->update($this->queueName, array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         echo date('Y-m-d H:i:s') . ' [' . $jobObj->name . '@' . $pid . '] Success. ' . PHP_EOL;
                     } catch (\Exception $e) {
-                        $dbquery->update('job_queue', array('status' => -1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
+                        $dbquery->update($this->queueName, array('status' => -1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         echo date('Y-m-d H:i:s') . ' [' . $jobObj->name . '] Failed. ' . PHP_EOL . $e->getMessage() . PHP_EOL;
                     }
                 }

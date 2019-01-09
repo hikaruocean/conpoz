@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 try {
     define('CONPOZ_PATH', realpath(__DIR__ . '/..'));
