@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Db\DBQuery;
 
 class ResultHandler  implements \Iterator
@@ -8,7 +8,7 @@ class ResultHandler  implements \Iterator
     public $error = null;
     public $lastInsertId = null;
     public $rowCount = null;
-    public function __construct(array $params = array()) 
+    public function __construct(array $params = array())
     {
         if (isset($params['success']) && $params['success']) {
             $this->success = true;
@@ -24,7 +24,7 @@ class ResultHandler  implements \Iterator
         }
     }
 
-    public function fetch() 
+    public function fetch()
     {
         if (is_null($this->sth)) {
             return false;
@@ -40,33 +40,33 @@ class ResultHandler  implements \Iterator
         return $this->sth->fetchAll(\PDO::FETCH_OBJ);
     }
 
-    public function success() 
+    public function success()
     {
         return $this->success;
     }
 
-    public function error() 
+    public function error()
     {
         return $this->error;
     }
 
-    public function lastInsertId() 
+    public function lastInsertId()
     {
         return $this->lastInsertId;
     }
 
-    public function rowCount() 
+    public function rowCount()
     {
-        return $this->rowCount;
+        return is_null($this->rowCount) ? 0 :$this->rowCount;
     }
 
     /**
-     * Iterator implement method 
+     * Iterator implement method
      */
-    
+
     private $position = 0;
 
-    public function rewind() 
+    public function rewind()
     {
 
     }
@@ -79,7 +79,7 @@ class ResultHandler  implements \Iterator
         return true;
     }
 
-    public function current() 
+    public function current()
     {
         if (is_null($this->sth)) {
             return false;
