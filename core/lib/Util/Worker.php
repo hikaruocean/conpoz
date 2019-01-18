@@ -83,6 +83,32 @@ class Worker
 
     private function managerLoop ()
     {
+        $childPidAry = array_keys($this->childLastLive);
+        pcntl_async_signals(true);
+        pcntl_signal(SIGTERM, function () use ($childPidAry) {
+            echo 'SIGTERM' . PHP_EOL;
+            foreach ($childPidAry as $pid) {
+                echo 'kill ' . $pid . PHP_EOL;
+                posix_kill($pid, SIGKILL);
+            }
+            exit();
+        });
+        pcntl_signal(SIGINT, function () use ($childPidAry) {
+            echo 'SIGINT' . PHP_EOL;
+            foreach ($childPidAry as $pid) {
+                echo 'kill ' . $pid . PHP_EOL;
+                posix_kill($pid, SIGKILL);
+            }
+            exit();
+        });
+        pcntl_signal(SIGQUIT, function () use ($childPidAry) {
+            echo 'SIGQUIT' . PHP_EOL;
+            foreach ($childPidAry as $pid) {
+                echo 'kill ' . $pid . PHP_EOL;
+                posix_kill($pid, SIGKILL);
+            }
+            exit();
+        });
         while (1) {
             $changedSockAry = $this->childSockAry;
             $write = NULL;
@@ -91,7 +117,7 @@ class Worker
             if ($changeSockNums > 0) {
 
                 foreach ($changedSockAry as $socket) {
-                    $buf = socket_read($socket,256);
+                    $buf = socket_read($socket, 1024);
                     $index = array_search($socket, $this->childSockAry);
                     if (strlen($buf) === 0) {
                         echo "client disconnect [AutoCallExitCommand]" . PHP_EOL;
@@ -102,7 +128,7 @@ class Worker
                     }
                     else {
                         $this->childLastLive[$index] = time();
-                        echo 'PID ' . $index . ' Says : ' . $buf . PHP_EOL;
+                        echo 'PID ' . $index . ' Says : ' . $buf . '[' . date('YmdHis') . ']' . PHP_EOL;
                         $okStr = 'ok';
                         $this->speak($socket, $okStr);
                     }
@@ -148,10 +174,10 @@ class Worker
                         }
                         $this->jobObj->{$jobObj->name}($jobObj->params);
                         $dbquery->update($this->queueName, array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
-                        echo date('Y-m-d H:i:s') . ' [' . $jobObj->name . '@' . $pid . '] Success. ' . PHP_EOL;
+                        $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Success.');
                     } catch (\Exception $e) {
                         $dbquery->update($this->queueName, array('status' => -1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
-                        echo date('Y-m-d H:i:s') . ' [' . $jobObj->name . '] Failed. ' . PHP_EOL . $e->getMessage() . PHP_EOL;
+                        $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Failed.' . PHP_EOL . $e->getMessage());
                     }
                 }
                 $this->speakThenListen($this->parentSock, $this->params['usleepTime']);
