@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 namespace Conpoz\Core\Lib\Db;
-class DBQuery 
+class DBQuery
 {
     const AUTO_RESOURCE_ID = -1;
     const MASTER_RESOURCE_ID = 0;
@@ -25,14 +25,14 @@ class DBQuery
     public $success = array(false, false);
     public $deadlockRetryTimes = 3;
     public $deadlockUsleepTime = 300000; //0.3s
-    
+
     /**
     * set following attr before DBQUERY::connect()
     **/
     public $masterDisableLoadbalance = true;
     public $persistent = true;
     public $emulatePrepare = true;
-    
+
     private $singleResoure = true;
     private $focusMaster = false;
     private $errorInfo = null;
@@ -44,7 +44,7 @@ class DBQuery
     public $table;
     public $data;
 
-    public function __construct($dsnSet) 
+    public function __construct($dsnSet)
     {
         set_error_handler(function($errno, $errstr, $errfile, $errline) {
             if (strpos($errstr, 'MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
@@ -60,7 +60,7 @@ class DBQuery
                 }
             }
         }, $this);
-        
+
         foreach ($dsnSet as $key => $val) {
             switch ($key) {
                 case 'master':
@@ -143,16 +143,16 @@ class DBQuery
         $this->sqlErrorHandler = $function;
     }
 
-    public function success() 
+    public function success()
     {
         return $this->success;
     }
 
-    public function error() 
+    public function error()
     {
         return $this->errorInfo;
     }
-    
+
     protected function beforeBegin()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN])) {
@@ -163,7 +163,7 @@ class DBQuery
         }
     }
 
-    public function begin() 
+    public function begin()
     {
         $this->focusMaster = true;
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
@@ -192,7 +192,7 @@ class DBQuery
         $this->afterBegin($return);
         return $return;
     }
-    
+
     protected function afterBegin($success)
     {
         if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN])) {
@@ -213,7 +213,7 @@ class DBQuery
         }
     }
 
-    public function commit() 
+    public function commit()
     {
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
@@ -244,7 +244,7 @@ class DBQuery
         }
     }
 
-    public function rollback() 
+    public function rollback()
     {
         if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
             $this->connect(SELF::MASTER_RESOURCE_ID);
@@ -264,7 +264,7 @@ class DBQuery
             $callback->__invoke($success);
         }
     }
-    
+
     protected function beforeExecute()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_EXECUTE])) {
@@ -274,13 +274,13 @@ class DBQuery
             $callback->__invoke();
         }
     }
-    
-    public function execute($sql, array $params = array(), $dbEnv = SELF::AUTO_RESOURCE_ID) 
+
+    public function execute($sql, array $params = array(), $dbEnv = SELF::AUTO_RESOURCE_ID)
     {
         if (empty($sql)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement is required');
         }
-        
+
         $resourceIndex = null;
         if ($this->singleResoure) {
             $resourceIndex = SELF::MASTER_RESOURCE_ID;
@@ -293,7 +293,7 @@ class DBQuery
                 case SELF::SLAVE_RESOURCE_ID:
                     $resourceIndex = SELF::SLAVE_RESOURCE_ID;
                     break;
-                default: 
+                default:
                 // case SELF::AUTO_RESOURCE_ID:
                     if ($this->focusMaster) {
                         $resourceIndex = SELF::MASTER_RESOURCE_ID;
@@ -308,11 +308,11 @@ class DBQuery
                     }
             }
         }
-        
+
         $this->sth = null;
         if (!$this->success[$resourceIndex]) {
             $this->connect($resourceIndex);
-        } 
+        }
         $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
         foreach ($params as $k => $v) {
             $bindType = SELF::$bindType['others'];
@@ -325,7 +325,7 @@ class DBQuery
                 $this->sth->bindValue(':' . $k, $v, $bindType);
             }
         }
-        
+
         /**
         * execute and handle deadlock, and redo for setting times
         **/
@@ -370,7 +370,7 @@ class DBQuery
                 }
             }
         }
-        
+
         $rh = new \Conpoz\Core\Lib\Db\DBQuery\ResultHandler(array(
             'success' => $success,
             'sth' => $this->sth,
@@ -383,7 +383,7 @@ class DBQuery
         $this->afterExecute($rh);
         return $rh;
     }
-    
+
     protected function sthProcess ($resourceIndex, $sql, $params)
     {
         $sth = $this->db[$resourceIndex]->prepare($sql);
@@ -400,7 +400,7 @@ class DBQuery
         }
         return $sth;
     }
-    
+
     protected function afterExecute($rh)
     {
         if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_EXECUTE])) {
@@ -411,7 +411,7 @@ class DBQuery
         }
     }
 
-    protected function beforeInsert() 
+    protected function beforeInsert()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_INSERT])) {
             return;
@@ -421,11 +421,11 @@ class DBQuery
         }
     }
 
-    public function insert($table, array $data = array()) 
+    public function insert($table, array $data = array())
     {
         if (empty($data)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql insert data is required');
-        } 
+        }
         if (empty($table)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
         }
@@ -452,7 +452,7 @@ class DBQuery
         }
     }
 
-    protected function beforeUpdate() 
+    protected function beforeUpdate()
     {
         if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_UPDATE])) {
             return;
@@ -462,11 +462,11 @@ class DBQuery
         }
     }
 
-    public function update($table, array $data, $conditions = null, array $params = array()) 
+    public function update($table, array $data, $conditions = null, array $params = array())
     {
         if (empty($data)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql update data is required');
-        } 
+        }
         if (empty($table)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
         }
@@ -493,7 +493,7 @@ class DBQuery
         return $rh;
     }
 
-    protected function afterUpdate($rh) 
+    protected function afterUpdate($rh)
     {
         if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_UPDATE])) {
             return;
@@ -513,7 +513,7 @@ class DBQuery
         }
     }
 
-    public function delete($table, $conditions = null, array $params = array()) 
+    public function delete($table, $conditions = null, array $params = array())
     {
         if (empty($table)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql db table is required');
@@ -541,9 +541,28 @@ class DBQuery
             $callback->__invoke($rh);
         }
     }
-    
+
     public function event ($timing, $action, $callback)
     {
         $this->event[$timing][$action][] = $callback;
+    }
+
+    public function whereInHelper (array $data = array())
+    {
+        $obj = new \StdClass();
+        $obj->str = '';
+        $obj->bindData = array();
+        if (empty($data)) {
+            throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('whereInHelper get an empty array');
+        }
+        foreach ($data as $k => $v) {
+            if ($k != 0) {
+                $obj->str .= ',';
+            }
+            $obj->str .= ':wi_' . $k;
+            $obj->bindData['wi_' . $k] = $v;
+        }
+        $obj->str = '(' . $obj->str . ')';
+        return $obj;
     }
 }
