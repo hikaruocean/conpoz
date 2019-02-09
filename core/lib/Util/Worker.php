@@ -11,21 +11,35 @@ class Worker
                 'childProcessQuantity' => 4,
                 'detectLiveTimeSec' => 180,
             );
-    public $jobObj = null;
+    public $jobObj = array();
     public $dbquery = null;
     public $queueName = 'job_queue';
 
-    public function __construct ($dbquery = null, $jobObj = null, $params = array())
+    public function __construct ($dbquery = null, $jobObjArray = array(), $params = array())
     {
         $this->params = array_merge($this->params, $params);
         $this->params['usleepTime'] = $this->params['usleepBaseTime'];
-        $this->jobObj = $jobObj;
+        $this->setJobObjects($jobObjArray);
         $this->dbquery = $dbquery;
     }
 
-    public function setJobObject ($jobObj = null)
+    public function setJobObjects ($jobObjArray = array())
     {
-        $this->jobObj = $jobObj;
+        foreach ($jobObjArray as $jobObj) {
+            $this->addJobObject($jobObj);
+        }
+        return $this;
+    }
+
+    public function addJobObject ($jobObj = null)
+    {
+        if (!is_object($jobObj)) {
+            throw new \Exception('JobObj is not an object');
+        }
+        $className = get_class($jobObj);
+        $classNameArray = explode('\\', $className);
+        $keyName = array_pop($classNameArray);
+        $this->jobObj[$keyName] = $jobObj;
         return $this;
     }
 
@@ -43,8 +57,8 @@ class Worker
 
     public function run ()
     {
-        if (!is_object($this->jobObj)) {
-            throw new \Exception("setJobObject is required");
+        if (empty($this->jobObj)) {
+            throw new \Exception("Job Object didn't set");
         }
         if (!is_object($this->dbquery)) {
             throw new \Exception("setDBQuery is required");
@@ -169,10 +183,15 @@ class Worker
                         $this->params['usleepTime'] = $this->params['usleepTime'] < $this->params['usleepMinTime'] ? $this->params['usleepMinTime'] : $this->params['usleepTime'];
                     }
                     try {
-                        if (!is_callable(array($this->jobObj, $jobObj->name))) {
-                            throw new \Exception('job name not found');
+                        list($jobObjName, $jobObjMethod) = explode('::', $jobObj->name);
+                        $jobObjName = ucfirst($jobObjName);
+                        if (!isset($this->jobObj[$jobObjName])) {
+                            throw new \Exception('job object not found');
                         }
-                        $this->jobObj->{$jobObj->name}($jobObj->params);
+                        if(!is_callable(array($this->jobObj[$jobObjName], $jobObjMethod))) {
+                            throw new \Exception('job method not found');
+                        }
+                        $this->jobObj[$jobObjName]->{$jobObjMethod}($jobObj->params);
                         $dbquery->update($this->queueName, array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Success.');
                     } catch (\Exception $e) {

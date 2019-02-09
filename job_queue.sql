@@ -14,7 +14,7 @@
 -- 傾印  表格 tot.job_queue 結構
 CREATE TABLE IF NOT EXISTS `job_queue` (
   `job_queue_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(16) NOT NULL DEFAULT '',
+  `name` varchar(64) NOT NULL DEFAULT '',
   `params` varchar(256) NOT NULL DEFAULT '',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '-1: 處理失敗 0: 未處理, 1: 進行中, 2: 處理成功',
   `created_at` datetime NOT NULL,
