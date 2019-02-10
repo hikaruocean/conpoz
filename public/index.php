@@ -1,9 +1,10 @@
-<?php 
+<?php
 
 try {
     define('CONPOZ_PATH', realpath(__DIR__ . '/..'));
     define('APP_PATH', realpath(__DIR__ . '/../app'));
     define('CORE_PATH', realpath(__DIR__ . '/../core'));
+    define('LOG_PATH', realpath(__DIR__ . '/../log'));
 
     $config = require(APP_PATH . '/conf/config.php');
     require(APP_PATH . '/conf/envInit.php');
@@ -14,5 +15,9 @@ try {
     $app = new \Conpoz\Core\Lib\Mvc\App($bag);
     $app->run($config);
 } catch (\Exception $e) {
+    \Conpoz\Core\Lib\Util\SysLog::logException($e);
+    die($e->getMessage());
+} catch (\Error $e) {
+    \Conpoz\Core\Lib\Util\SysLog::logException($e);
     die($e->getMessage());
 }

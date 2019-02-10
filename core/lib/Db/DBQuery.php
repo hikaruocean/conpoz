@@ -46,13 +46,6 @@ class DBQuery
 
     public function __construct($dsnSet)
     {
-        set_error_handler(function($errno, $errstr, $errfile, $errline) {
-            if (strpos($errstr, 'MySQL server has gone away') !== false || strpos($errstr, "Error while sending QUERY packet") !== false) {
-                throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006, $errfile, $errline);
-            }
-            return false;
-        }, E_WARNING);
-
         register_shutdown_function(function(\Conpoz\Core\Lib\Db\DBQuery $obj) {
             if($obj->success[SELF::MASTER_RESOURCE_ID] && $obj->db[SELF::MASTER_RESOURCE_ID]->inTransaction()) {
                 if(!$obj->db[SELF::MASTER_RESOURCE_ID]->rollBack()) {

@@ -195,9 +195,11 @@ class Worker
                         $dbquery->update($this->queueName, array('status' => 2), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Success.');
                     } catch (\Exception $e) {
+                        \Conpoz\Core\Lib\Util\SysLog::logException($e, 'worker');
                         $dbquery->update($this->queueName, array('status' => -1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Failed.' . PHP_EOL . $e->getMessage());
                     } catch (\Error $e) {
+                        \Conpoz\Core\Lib\Util\SysLog::logException($e, 'worker');
                         $dbquery->update($this->queueName, array('status' => -1), "job_queue_id = :jobQueueId", array('jobQueueId' => $jobObj->job_queue_id));
                         $this->speakThenListen($this->parentSock, '[' . $jobObj->name . '] Failed.' . PHP_EOL . $e->getMessage());
                     }
