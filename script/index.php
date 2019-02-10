@@ -15,9 +15,9 @@ try {
     $app = new \Conpoz\Core\Lib\Script\App($bag);
     $app->run($config, $argv);
 } catch (\Exception $e) {
-    \Conpoz\Core\Lib\Util\SysLog::logException($e, 'cli');
+    \Conpoz\Core\Lib\Util\SysLog::logException($e, null, 'cli');
     die($e->getMessage());
 } catch (\Error $e) {
-    \Conpoz\Core\Lib\Util\SysLog::logException($e, 'cli');
+    \Conpoz\Core\Lib\Util\SysLog::logException($e, null, 'cli');
     die($e->getMessage());
 }
