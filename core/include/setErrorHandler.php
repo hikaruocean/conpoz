@@ -4,4 +4,4 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception("Mysql server has gone away", 2006, $errfile, $errline);
     }
     throw new \Exception('[Conpoz Catch Error] ' . $errno . ' ' . $errstr . ' ' . $errfile . ' ' . $errline);
-}, E_ALL);
+});

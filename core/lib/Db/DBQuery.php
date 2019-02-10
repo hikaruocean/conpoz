@@ -15,7 +15,7 @@ class DBQuery
     const ACTION_INSERT = 4;
     const ACTION_UPDATE = 5;
     const ACTION_DELETE = 6;
-    static public $bindType = array(
+    public static $bindType = array(
         'boolean' => \PDO::PARAM_BOOL,
         'integer' => \PDO::PARAM_INT,
         'others' => \PDO::PARAM_STR,
@@ -40,15 +40,15 @@ class DBQuery
     private $username = array();
     private $password = array();
     private $sqlErrorHandler = null;
-    protected $event = array(SELF::TIMING_BEFORE => array(), SELF::TIMING_AFTER => array());
+    protected $event = array(self::TIMING_BEFORE => array(), self::TIMING_AFTER => array());
     public $table;
     public $data;
 
     public function __construct($dsnSet)
     {
         register_shutdown_function(function(\Conpoz\Core\Lib\Db\DBQuery $obj) {
-            if($obj->success[SELF::MASTER_RESOURCE_ID] && $obj->db[SELF::MASTER_RESOURCE_ID]->inTransaction()) {
-                if(!$obj->db[SELF::MASTER_RESOURCE_ID]->rollBack()) {
+            if($obj->success[self::MASTER_RESOURCE_ID] && $obj->db[self::MASTER_RESOURCE_ID]->inTransaction()) {
+                if(!$obj->db[self::MASTER_RESOURCE_ID]->rollBack()) {
                     $obj->db = null;
                 }
             }
@@ -86,29 +86,29 @@ class DBQuery
         }
     }
 
-    public function connect ($dbEnv = SELF::MASTER_RESOURCE_ID)
+    public function connect ($dbEnv = self::MASTER_RESOURCE_ID)
     {
         $retry = 0;
         $reconnectLimitTimes = 1;
         while (true) {
             try {
                 switch ($dbEnv) {
-                    case SELF::MASTER_RESOURCE_ID:
-                        $this->db[SELF::MASTER_RESOURCE_ID] = new \PDO($this->dsnSet[0], $this->username[0], $this->password[0], array(
+                    case self::MASTER_RESOURCE_ID:
+                        $this->db[self::MASTER_RESOURCE_ID] = new \PDO($this->dsnSet[0], $this->username[0], $this->password[0], array(
                             \PDO::ATTR_PERSISTENT => $this->persistent
                         ));
-                        $this->db[SELF::MASTER_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
+                        $this->db[self::MASTER_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
                         break;
-                    case SELF::SLAVE_RESOURCE_ID:
+                    case self::SLAVE_RESOURCE_ID:
                         if ($this->masterDisableLoadbalance) {
                             $slaveIndex = mt_rand(1, count($this->dsnSet) - 1);
                         } else {
                             $slaveIndex = mt_rand(0, count($this->dsnSet) - 1);
                         }
-                        $this->db[SELF::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
+                        $this->db[self::SLAVE_RESOURCE_ID] = new \PDO($this->dsnSet[$slaveIndex], $this->username[$slaveIndex], $this->password[$slaveIndex], array(
                             \PDO::ATTR_PERSISTENT => $this->persistent
                         ));
-                        $this->db[SELF::SLAVE_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
+                        $this->db[self::SLAVE_RESOURCE_ID]->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulatePrepare);
                         break;
                 }
                 break;
@@ -148,10 +148,10 @@ class DBQuery
 
     protected function beforeBegin()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_BEGIN])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_BEGIN] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_BEGIN] as $callback) {
             $callback->__invoke();
         }
     }
@@ -159,15 +159,15 @@ class DBQuery
     public function begin()
     {
         $this->focusMaster = true;
-        if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
-            $this->connect(SELF::MASTER_RESOURCE_ID);
+        if (!$this->success[self::MASTER_RESOURCE_ID]) {
+            $this->connect(self::MASTER_RESOURCE_ID);
         }
         $this->beforeBegin();
         $retry = 0;
         $reconnectLimitTimes = 1;
         while (true) {
             try {
-                $return = $this->db[SELF::MASTER_RESOURCE_ID]->beginTransaction();
+                $return = $this->db[self::MASTER_RESOURCE_ID]->beginTransaction();
                 break;
             } catch (\Conpoz\Core\Lib\Db\DBQuery\Exception $e) {
                 echo $e->getCode();
@@ -176,7 +176,7 @@ class DBQuery
                 }
                 if ($retry < $reconnectLimitTimes) {
                     $retry ++;
-                    $this->connect(SELF::MASTER_RESOURCE_ID);
+                    $this->connect(self::MASTER_RESOURCE_ID);
                 } else {
                     throw $e;
                 }
@@ -188,87 +188,87 @@ class DBQuery
 
     protected function afterBegin($success)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_BEGIN])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_BEGIN] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_BEGIN] as $callback) {
             $callback->__invoke($success);
         }
     }
 
     protected function beforeCommit()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_COMMIT])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_COMMIT])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_COMMIT] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_COMMIT] as $callback) {
             $callback->__invoke();
         }
     }
 
     public function commit()
     {
-        if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
-            $this->connect(SELF::MASTER_RESOURCE_ID);
+        if (!$this->success[self::MASTER_RESOURCE_ID]) {
+            $this->connect(self::MASTER_RESOURCE_ID);
         }
         $this->beforeCommit();
-        $return = $this->db[SELF::MASTER_RESOURCE_ID]->commit();
+        $return = $this->db[self::MASTER_RESOURCE_ID]->commit();
         $this->afterCommit($return);
         return $return;
     }
 
     protected function afterCommit($success)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_COMMIT])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_COMMIT])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_COMMIT] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_COMMIT] as $callback) {
             $callback->__invoke($success);
         }
     }
 
     protected function beforeRollback()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_ROLLBACK])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_ROLLBACK])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_ROLLBACK] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_ROLLBACK] as $callback) {
             $callback->__invoke();
         }
     }
 
     public function rollback()
     {
-        if (!$this->success[SELF::MASTER_RESOURCE_ID]) {
-            $this->connect(SELF::MASTER_RESOURCE_ID);
+        if (!$this->success[self::MASTER_RESOURCE_ID]) {
+            $this->connect(self::MASTER_RESOURCE_ID);
         }
         $this->beforeRollback();
-        $return = $this->db[SELF::MASTER_RESOURCE_ID]->rollBack();
+        $return = $this->db[self::MASTER_RESOURCE_ID]->rollBack();
         $this->afterRollback($return);
         return $return;
     }
 
     protected function afterRollback($success)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_ROLLBACK])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_ROLLBACK])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_ROLLBACK] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_ROLLBACK] as $callback) {
             $callback->__invoke($success);
         }
     }
 
     protected function beforeExecute()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_EXECUTE])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_EXECUTE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_EXECUTE] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_EXECUTE] as $callback) {
             $callback->__invoke();
         }
     }
 
-    public function execute($sql, array $params = array(), $dbEnv = SELF::AUTO_RESOURCE_ID)
+    public function execute($sql, array $params = array(), $dbEnv = self::AUTO_RESOURCE_ID)
     {
         if (empty($sql)) {
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement is required');
@@ -276,26 +276,26 @@ class DBQuery
 
         $resourceIndex = null;
         if ($this->singleResoure) {
-            $resourceIndex = SELF::MASTER_RESOURCE_ID;
+            $resourceIndex = self::MASTER_RESOURCE_ID;
         } else {
             switch ($dbEnv) {
-                case SELF::MASTER_RESOURCE_ID:
-                    $resourceIndex = SELF::MASTER_RESOURCE_ID;
+                case self::MASTER_RESOURCE_ID:
+                    $resourceIndex = self::MASTER_RESOURCE_ID;
                     $this->focusMaster = true;
                     break;
-                case SELF::SLAVE_RESOURCE_ID:
-                    $resourceIndex = SELF::SLAVE_RESOURCE_ID;
+                case self::SLAVE_RESOURCE_ID:
+                    $resourceIndex = self::SLAVE_RESOURCE_ID;
                     break;
                 default:
-                // case SELF::AUTO_RESOURCE_ID:
+                // case self::AUTO_RESOURCE_ID:
                     if ($this->focusMaster) {
-                        $resourceIndex = SELF::MASTER_RESOURCE_ID;
+                        $resourceIndex = self::MASTER_RESOURCE_ID;
                     } else {
                         //'IN SHARE MODE', 'FOR UPDATE'
                         if (stripos(trim($sql), 'SELECT') === 0 && !preg_match('/\s+lock\s+in\s+share\s+mode/i', $sql) && !preg_match('/\s+for\s+update/i', $sql)) {
-                            $resourceIndex = SELF::SLAVE_RESOURCE_ID;
+                            $resourceIndex = self::SLAVE_RESOURCE_ID;
                         } else {
-                            $resourceIndex = SELF::MASTER_RESOURCE_ID;
+                            $resourceIndex = self::MASTER_RESOURCE_ID;
                             $this->focusMaster = true;
                         }
                     }
@@ -308,9 +308,9 @@ class DBQuery
         }
         $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
         foreach ($params as $k => $v) {
-            $bindType = SELF::$bindType['others'];
-            if (isset(SELF::$bindType[gettype($v)])) {
-                $bindType = SELF::$bindType[gettype($v)];
+            $bindType = self::$bindType['others'];
+            if (isset(self::$bindType[gettype($v)])) {
+                $bindType = self::$bindType[gettype($v)];
             }
             if (is_int($k)) {
                 $this->sth->bindValue($k + 1, $v, $bindType);
@@ -381,9 +381,9 @@ class DBQuery
     {
         $sth = $this->db[$resourceIndex]->prepare($sql);
         foreach ($params as $k => $v) {
-            $bindType = SELF::$bindType['others'];
-            if (isset(SELF::$bindType[gettype($v)])) {
-                $bindType = SELF::$bindType[gettype($v)];
+            $bindType = self::$bindType['others'];
+            if (isset(self::$bindType[gettype($v)])) {
+                $bindType = self::$bindType[gettype($v)];
             }
             if (is_int($k)) {
                 $sth->bindValue($k + 1, $v, $bindType);
@@ -396,20 +396,20 @@ class DBQuery
 
     protected function afterExecute($rh)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_EXECUTE])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_EXECUTE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_EXECUTE] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_EXECUTE] as $callback) {
             $callback->__invoke($rh);
         }
     }
 
     protected function beforeInsert()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_INSERT])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_INSERT])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_INSERT] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_INSERT] as $callback) {
             $callback->__invoke();
         }
     }
@@ -429,28 +429,28 @@ class DBQuery
         $columnsStr = '(' . $columnsStr . ')';
         $valuesBindStr = '(:' . implode(',:', array_keys($this->data)) . ')';
         $sql = 'INSERT INTO ' . $table .' '. $columnsStr . ' VALUES ' . $valuesBindStr;
-        $rh = $this->execute($sql, $this->data, SELF::MASTER_RESOURCE_ID);
-        $rh->lastInsertId = $this->db[SELF::MASTER_RESOURCE_ID]->lastInsertId();
+        $rh = $this->execute($sql, $this->data, self::MASTER_RESOURCE_ID);
+        $rh->lastInsertId = $this->db[self::MASTER_RESOURCE_ID]->lastInsertId();
         $this->afterInsert($rh);
         return $rh;
     }
 
     protected function afterInsert ($rh)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_INSERT])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_INSERT])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_INSERT] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_INSERT] as $callback) {
             $callback->__invoke($rh);
         }
     }
 
     protected function beforeUpdate()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_UPDATE])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_UPDATE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_UPDATE] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_UPDATE] as $callback) {
             $callback->__invoke();
         }
     }
@@ -481,27 +481,27 @@ class DBQuery
         }
         $updateStr = trim($updateStr, ',');
         $sql = 'UPDATE ' . $table . ' SET ' . $updateStr . ' WHERE ' . $conditions;
-        $rh = $this->execute($sql, array_merge($paramsAry, $params), SELF::MASTER_RESOURCE_ID);
+        $rh = $this->execute($sql, array_merge($paramsAry, $params), self::MASTER_RESOURCE_ID);
         $this->afterUpdate($rh);
         return $rh;
     }
 
     protected function afterUpdate($rh)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_UPDATE])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_UPDATE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_UPDATE] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_UPDATE] as $callback) {
             $callback->__invoke($rh);
         }
     }
 
     protected function beforeDelete ()
     {
-        if (!isset($this->event[SELF::TIMING_BEFORE][SELF::ACTION_DELETE])) {
+        if (!isset($this->event[self::TIMING_BEFORE][self::ACTION_DELETE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_BEFORE][SELF::ACTION_DELETE] as $callback) {
+        foreach ($this->event[self::TIMING_BEFORE][self::ACTION_DELETE] as $callback) {
             $callback->__invoke();
         }
     }
@@ -520,17 +520,17 @@ class DBQuery
         }
         $this->beforeDelete();
         $sql = 'DELETE ' . $table . ' FROM ' . $table . ' WHERE ' . $conditions;
-        $rh = $this->execute($sql, $params, SELF::MASTER_RESOURCE_ID);
+        $rh = $this->execute($sql, $params, self::MASTER_RESOURCE_ID);
         $this->afterDelete($rh);
         return $rh;
     }
 
     protected function afterDelete ($rh)
     {
-        if (!isset($this->event[SELF::TIMING_AFTER][SELF::ACTION_DELETE])) {
+        if (!isset($this->event[self::TIMING_AFTER][self::ACTION_DELETE])) {
             return;
         }
-        foreach ($this->event[SELF::TIMING_AFTER][SELF::ACTION_DELETE] as $callback) {
+        foreach ($this->event[self::TIMING_AFTER][self::ACTION_DELETE] as $callback) {
             $callback->__invoke($rh);
         }
     }
