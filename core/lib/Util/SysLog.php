@@ -23,7 +23,7 @@ class SysLog
         fwrite(self::$fileHandlerArray[$suffix], $logString);
     }
 
-    public static function logException (\Exception $e, $refData = '', $suffix = 'conpoz')
+    public static function logException (\Throwable $e, $refData = '', $suffix = 'conpoz')
     {
         $logString = $e->getMessage() . PHP_EOL;
         if (!empty($refData)) {
