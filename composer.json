@@ -1,5 +1,6 @@
 {
     "require": {
-        "abeautifulsite/simpleimage": "^2.6"
+        "abeautifulsite/simpleimage": "^2.6",
+        "nikic/fast-route": "^1.3"
     }
 }

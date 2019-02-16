@@ -8,7 +8,7 @@ class Index extends \Conpoz\App\Controller\BaseController
         echo 'hello world';
     }
 
-    public function uploadAction () 
+    public function uploadAction ()
     {
         if ($this->bag->req->getMethod() == 'POST') {
             $fileObjAry = $this->bag->req->getFile('image');

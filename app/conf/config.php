@@ -1,4 +1,4 @@
-<?php 
+<?php
 $config = new \stdClass();
 $config->route = array(
     'defaultController' => 'Index',
