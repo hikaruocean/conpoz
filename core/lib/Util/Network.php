@@ -61,7 +61,7 @@ class Network
             curl_setopt_array($ch, $setOptArray);
         }
         $content = curl_exec($ch);
-        $returnAry = array();
+        $returnAry = array('httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE));
         if ($content === false) {
             $returnAry['errorNo'] = curl_errno($ch);
             $returnAry['errorMsg'] = curl_error($ch);
@@ -116,7 +116,7 @@ class Network
             curl_setopt_array($ch, $setOptArray);
         }
         $content = curl_exec($ch);
-        $returnAry = array();
+        $returnAry = array('httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE));
         if ($content === false) {
             $returnAry['errorNo'] = curl_errno($ch);
             $returnAry['errorMsg'] = curl_error($ch);
@@ -189,7 +189,7 @@ class Network
             curl_setopt_array($ch, $setOptArray);
         }
         $content = curl_exec($ch);
-        $returnAry = array();
+        $returnAry = array('httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE));
         if ($content === false) {
             $returnAry['errorNo'] = curl_errno($ch);
             $returnAry['errorMsg'] = curl_error($ch);
