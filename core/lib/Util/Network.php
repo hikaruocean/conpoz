@@ -1,10 +1,10 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Util;
 
 class Network
 {
     public static $userAgent = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.220 Safari/535.1";
-    public static function httpPost($url, $params = null, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null) {
+    public static function httpPost($url, $params = null, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null, $setOptArray = array()) {
         $pstring = '';
         if (is_array($params)) {
             $z = 0;
@@ -57,6 +57,9 @@ class Network
         if ($proxy) {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
         }
+        if (!empty($setOptArray)) {
+            curl_setopt_array($ch, $setOptArray);
+        }
         $content = curl_exec($ch);
         $returnAry = array();
         if ($content === false) {
@@ -71,7 +74,7 @@ class Network
         return $returnAry;
     }
 
-    public static function httpGet($url, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null) {
+    public static function httpGet($url, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null, $setOptArray = array()) {
         $cstring = '';
         if (!$cookieFilePath) {
             if (is_array($cookie)) {
@@ -109,6 +112,9 @@ class Network
         if ($proxy) {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
         }
+        if (!empty($setOptArray)) {
+            curl_setopt_array($ch, $setOptArray);
+        }
         $content = curl_exec($ch);
         $returnAry = array();
         if ($content === false) {
@@ -123,7 +129,7 @@ class Network
         return $returnAry;
     }
 
-    public static function httpRequest($method, $url, $params = null, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null) {
+    public static function httpRequest($method, $url, $params = null, $headerAry = null, $cookie = null, $cookieFilePath = null, $referer = null, $proxy = null, $setOptArray = array()) {
         $pstring = '';
         if (is_array($params)) {
             $z = 0;
@@ -157,6 +163,9 @@ class Network
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_USERAGENT, self::$userAgent);
+        if ($method === 'HEAD') {
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+        }
         if ($pstring) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $pstring);
         }
@@ -176,6 +185,9 @@ class Network
         if ($proxy) {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
         }
+        if (!empty($setOptArray)) {
+            curl_setopt_array($ch, $setOptArray);
+        }
         $content = curl_exec($ch);
         $returnAry = array();
         if ($content === false) {
@@ -190,5 +202,5 @@ class Network
         return $returnAry;
     }
 
-    
+
 }
