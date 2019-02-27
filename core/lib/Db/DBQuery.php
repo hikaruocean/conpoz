@@ -307,18 +307,7 @@ class DBQuery
             $this->connect($resourceIndex);
         }
         $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
-        foreach ($params as $k => $v) {
-            $bindType = self::$bindType['others'];
-            if (isset(self::$bindType[gettype($v)])) {
-                $bindType = self::$bindType[gettype($v)];
-            }
-            if (is_int($k)) {
-                $this->sth->bindValue($k + 1, $v, $bindType);
-            } else {
-                $this->sth->bindValue(':' . $k, $v, $bindType);
-            }
-        }
-
+        
         /**
         * execute and handle deadlock, and redo for setting times
         **/
