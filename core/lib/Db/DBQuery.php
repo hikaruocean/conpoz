@@ -307,7 +307,7 @@ class DBQuery
             $this->connect($resourceIndex);
         }
         $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
-        
+
         /**
         * execute and handle deadlock, and redo for setting times
         **/
@@ -456,9 +456,6 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement conditions is required');
         }
         $this->table = $table;
-        if (is_array($table)) {
-            $table = implode(', ', $table);
-        }
         $this->data = $data;
         $this->beforeUpdate();
         $updateStr = '';
@@ -504,11 +501,8 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('SQL statement conditions is required');
         }
         $this->table = $table;
-        if (is_array($table)) {
-            $table = implode(', ', $table);
-        }
         $this->beforeDelete();
-        $sql = 'DELETE ' . $table . ' FROM ' . $table . ' WHERE ' . $conditions;
+        $sql = 'DELETE FROM ' . $table . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, $params, self::MASTER_RESOURCE_ID);
         $this->afterDelete($rh);
         return $rh;
