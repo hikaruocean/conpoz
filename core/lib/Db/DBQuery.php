@@ -307,17 +307,6 @@ class DBQuery
             $this->connect($resourceIndex);
         }
         $this->sth = $this->sthProcess($resourceIndex, $sql, $params);
-        foreach ($params as $k => $v) {
-            $bindType = self::$bindType['others'];
-            if (isset(self::$bindType[gettype($v)])) {
-                $bindType = self::$bindType[gettype($v)];
-            }
-            if (is_int($k)) {
-                $this->sth->bindValue($k + 1, $v, $bindType);
-            } else {
-                $this->sth->bindValue(':' . $k, $v, $bindType);
-            }
-        }
 
         /**
         * execute and handle deadlock, and redo for setting times
@@ -467,9 +456,6 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('Mysql sql statement conditions is required');
         }
         $this->table = $table;
-        if (is_array($table)) {
-            $table = implode(', ', $table);
-        }
         $this->data = $data;
         $this->beforeUpdate();
         $updateStr = '';
@@ -515,11 +501,8 @@ class DBQuery
             throw new \Conpoz\Core\Lib\Db\DBQuery\Exception('SQL statement conditions is required');
         }
         $this->table = $table;
-        if (is_array($table)) {
-            $table = implode(', ', $table);
-        }
         $this->beforeDelete();
-        $sql = 'DELETE ' . $table . ' FROM ' . $table . ' WHERE ' . $conditions;
+        $sql = 'DELETE FROM ' . $table . ' WHERE ' . $conditions;
         $rh = $this->execute($sql, $params, self::MASTER_RESOURCE_ID);
         $this->afterDelete($rh);
         return $rh;
