@@ -17,4 +17,14 @@ class Note
         }
         return $this->instance[$instanceName];
     }
+
+    public function __isset($instanceName)
+    {
+        return isset($this->instance[$instanceName]);
+    }
+
+    public function __unset($instanceName)
+    {
+        unset($this->instance[$instanceName]);
+    }
 }
