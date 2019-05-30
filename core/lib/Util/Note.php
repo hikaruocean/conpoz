@@ -1,5 +1,5 @@
 <?php
-namespace Conpoz\Core\Util\Lib;
+namespace Conpoz\Core\Lib\Util;
 
 class Note
 {
