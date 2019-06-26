@@ -1,32 +1,35 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Util;
 
 class Tool
 {
     public static function force(&$data, $key = null, $default = null) {
-        $return = $default;
         switch (gettype($data)) {
             case 'array':
                 if (!is_array($key)) {
-                    if (isset($data[$key])) {
-                        $return = $data[$key];
-                    }
+                    $return = isset($data[$key]) ? $data[$key] : $default;
                 } else {
                     $return = array();
-                    foreach($key as $v) {
-                        $return[$v] = isset($data[$v]) ? $data[$v] : $default;
+                    foreach($key as $k => $v) {
+                        if (is_int($k)) {
+                            $return[$v] = isset($data[$v]) ? $data[$v] : $default;
+                        } else {
+                            $return[$k] = isset($data[$k]) ? $data[$k] : $v;
+                        }
                     }
                 }
                 break;
             case 'object':
                 if (!is_array($key)) {
-                    if (isset($data->{$key})) {
-                        $return = $data->{$key};
-                    }
+                    $return = isset($data->{$key}) ? $data->{$key} : $default;
                 } else {
                     $return = array();
-                    foreach($key as $v) {
-                        $return[$v] = isset($data->{$v}) ? $data->{$v} : $default;
+                    foreach($key as $k => $v) {
+                        if (is_int($k)) {
+                            $return[$v] = isset($data->{$v}) ? $data->{$v} : $default;
+                        } else {
+                            $return[$k] = isset($data->{$k}) ? $data->{$k} : $v;
+                        }
                     }
                 }
         }
@@ -36,8 +39,8 @@ class Tool
     public static function html($string) {
         return htmlspecialchars($string, ENT_QUOTES);
     }
-    
-    public static function buildQuery ($uri, $newGetData = array()) 
+
+    public static function buildQuery ($uri, $newGetData = array())
     {
         $getData = $_GET;
         $returnQueryStr = '';
