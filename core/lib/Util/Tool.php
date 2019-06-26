@@ -32,6 +32,9 @@ class Tool
                         }
                     }
                 }
+                break;
+            default:
+                throw new \Exception('Tool::force method data type error');
         }
         return $return;
     }
