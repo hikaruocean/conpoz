@@ -1,10 +1,10 @@
-<?php 
+<?php
 namespace Conpoz\Core\Lib\Util;
 
 class Request
 {
     public $uri = null;
-    
+
     public function __construct()
     {
         $this->uri = isset($_GET['_url']) ? rtrim($_GET['_url'], '/') : '';
@@ -61,15 +61,15 @@ class Request
         if (!isset($_FILES[$name]) || empty($_FILES[$name])) {
             /**
              * Return empty array
-             */ 
+             */
             return array();
         }
 
         if (!is_array($_FILES[$name]['name'])) {
             $uploadFile = new \Conpoz\Core\Lib\Util\UploadFile($_FILES[$name]);
             return array($uploadFile);
-        } 
-        
+        }
+
         $result = array();
         foreach ($_FILES[$name]['name'] as $k => $v) {
             $uploadFile = new \Conpoz\Core\Lib\Util\UploadFile(array(
@@ -87,6 +87,15 @@ class Request
     public function getRawContent()
     {
         return file_get_contents('php://input');
+    }
+
+    public function getRawHanlder()
+    {
+        $fh = fopen('php://input', 'rb');
+        register_shutdown_function(function ($fh) {
+            fclose($fh);
+        }, $fh);
+        return $fh;
     }
 
     public function getMethod()
@@ -125,7 +134,7 @@ class Request
         }
         return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
     }
-    
+
     public function getUri ()
     {
         return $this->uri;
