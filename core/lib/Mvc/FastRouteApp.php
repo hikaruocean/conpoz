@@ -85,7 +85,7 @@ class FastRouteApp
                 return false;
             }
         }
-        $controllerObject->urlVars = $vars;
+        $controllerObject->app->urlVars = $vars;
         $controllerObject->{$action . 'Action'}($this->bag);
     }
 }

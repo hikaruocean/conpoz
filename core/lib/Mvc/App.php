@@ -33,6 +33,7 @@ class App
         $controller = isset($uriAry[0]) && !empty($uriAry[0]) ? $uriAry[0] : $this->config->route['defaultController'];
         $action = isset($uriAry[1]) && !empty($uriAry[1]) ? $uriAry[1] : $this->config->route['defaultAction'];
         $this->dispatch($controller, $action);
+        return true;
     }
 
     public function dispatch ($controller, $action)
