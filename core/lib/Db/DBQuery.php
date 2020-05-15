@@ -523,8 +523,20 @@ class DBQuery
         $this->event[$timing][$action][] = $callback;
     }
 
-    public function whereInHelper (array $data = array())
+    public function whereInHelper (array $data = array(), $type = 'string')
     {
+        $type =  strtolower($type);
+        switch ($type) {
+            case 'string':
+            case 'int':
+            case 'integer':
+            case 'float':
+            case 'double':
+                break;
+            default:
+                throw new \Exception('whereInHelper specify type [' . $type . '] error', -1);
+                break;
+        }
         $obj = new \StdClass();
         $obj->str = '';
         $obj->bindData = array();
@@ -536,9 +548,23 @@ class DBQuery
                 $obj->str .= ',';
             }
             $obj->str .= ':wi_' . $k;
+            settype($v, $type);
             $obj->bindData['wi_' . $k] = $v;
         }
         $obj->str = '(' . $obj->str . ')';
         return $obj;
+    }
+
+    public function quote ($data, $type = \PDO::PARAM_STR)
+    {
+        $resourceIndex = SELF::MASTER_RESOURCE_ID;
+        if ($this->success[SELF::SLAVE_RESOURCE_ID]) {
+            $resourceIndex = SELF::SLAVE_RESOURCE_ID;
+        } else if ($this->success[SELF::MASTER_RESOURCE_ID]) {
+            $resourceIndex = SELF::MASTER_RESOURCE_ID;
+        } else  {
+            $this->connect();
+        }
+        return $this->db[$resourceIndex]->quote($data, $type);
     }
 }
