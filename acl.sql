@@ -8,7 +8,9 @@ CREATE TABLE `acl_actions` (
   `name` varchar(64) NOT NULL,
   `descript` varchar(64) NOT NULL,
   `created` datetime NOT NULL,
-  `updated` datetime NOT NULL
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`action_id`),
+  KEY `idx-controller_id` (`controller_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -21,7 +23,8 @@ CREATE TABLE `acl_controllers` (
   `name` varchar(64) NOT NULL,
   `descript` varchar(64) NOT NULL,
   `created` datetime NOT NULL,
-  `updated` datetime NOT NULL
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`controller_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -35,7 +38,9 @@ CREATE TABLE `acl_grants` (
   `controller_id` int(10) UNSIGNED NOT NULL,
   `action_id` int(10) UNSIGNED NOT NULL,
   `created` datetime NOT NULL,
-  `updated` datetime NOT NULL
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`grant_id`),
+  KEY `idx-role_id` (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -48,33 +53,6 @@ CREATE TABLE `acl_roles` (
   `name` varchar(64) NOT NULL,
   `admin` char(1) NOT NULL,
   `created` datetime NOT NULL,
-  `updated` datetime NOT NULL
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`role_id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
---
--- 資料表索引 `acl_actions`
---
-ALTER TABLE `acl_actions`
-  ADD PRIMARY KEY (`action_id`),
-  ADD KEY `idx-controller_id` (`controller_id`) USING BTREE;
-
---
--- 資料表索引 `acl_controllers`
---
-ALTER TABLE `acl_controllers`
-  ADD PRIMARY KEY (`controller_id`);
-
---
--- 資料表索引 `acl_grants`
---
-ALTER TABLE `acl_grants`
-  ADD PRIMARY KEY (`grant_id`),
-  ADD KEY `idx-role_id` (`role_id`);
-
---
--- 資料表索引 `acl_roles`
---
-ALTER TABLE `acl_roles`
-  ADD PRIMARY KEY (`role_id`);
-
