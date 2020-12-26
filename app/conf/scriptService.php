@@ -9,11 +9,13 @@ $bag->dbquery = function () use ($config) {
     $db->setSqlErrorHandler(function ($rh) {
         throw new \Conpoz\Core\Lib\Db\DBQuery\Exception(json_encode($rh->error()));
     });
-    $db->event(DBQuery::TIMING_BEFORE, DBQuery::ACTION_INSERT, function () use ($db) {
-        $db->data['created'] = date('Y-m-d H:i:s');
+    $db->event(\Conpoz\Core\Lib\Db\DBQuery::TIMING_BEFORE, \Conpoz\Core\Lib\Db\DBQuery::ACTION_INSERT, function () use ($db) {
+        $date = date('Y-m-d H:i:s');
+        $db->data['created_at'] = $date;
+        $db->data['updated_at'] = $date;
     });
-    $db->event(DBQuery::TIMING_BEFORE, DBQuery::ACTION_UPDATE, function () use ($db) {
-        $db->data['updated'] = date('Y-m-d H:i:s');
+    $db->event(\Conpoz\Core\Lib\Db\DBQuery::TIMING_BEFORE, \Conpoz\Core\Lib\Db\DBQuery::ACTION_UPDATE, function () use ($db) {
+        $db->data['updated_at'] = date('Y-m-d H:i:s');
     });
     return $db;
 };
