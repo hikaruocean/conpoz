@@ -29,10 +29,10 @@ class FastRouteApp
         $this->config = $config;
         $uri = rtrim(isset($_GET['_url']) ? $_GET['_url'] : '', '/');
 
-        $dispatcher = require(APP_PATH . '/conf/route.php');
+        $this->fastRoute = require(APP_PATH . '/conf/route.php');
         $httpMethod = $_SERVER['REQUEST_METHOD'];
         $uri = rawurldecode($uri);
-        $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+        $routeInfo = $this->fastRoute->dispatch($httpMethod, $uri);
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
                 // ... 404 Not Found
