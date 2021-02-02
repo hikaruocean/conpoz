@@ -91,6 +91,7 @@ abstract class ValidateRule
 
     public function autoChoice(array $dataAry = array()) 
     {
+        $choiceAry = array();
         if (!empty($dataAry)) {
             foreach($dataAry as $k => $v) {
                 if (isset($this->{$k})) {
